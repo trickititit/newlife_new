@@ -195,9 +195,12 @@
             $.notify({
                 icon: 'ffont-icon font-icon-warning',
                 title: '<strong>Ошибка</strong>',
-                message: '{{session('error')}}',
+                url: '{{session('url')}}',
+                message: '{{session('error')}}'
             }, {
-                type: 'danger'
+                type: 'danger',
+                timer: 100000,
+                url_target: '_blank'
             });
         });
     </script>

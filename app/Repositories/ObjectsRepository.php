@@ -26,6 +26,12 @@ class ObjectsRepository extends Repository {
 
    public function addObject($request) {
         if ($request->has("obj_type")) {
+            $check = $this->checkObject($request);
+            if($check){
+                return array(
+                    'error' => 'Такой объект существует. Нажмите на сообщение, чтобы просмотреть объект.',
+                    'url' => route('site.object',['object'=>$check->alias]));
+                            }
             $obj_type = $request->obj_type;
             $obj_area_input = "obj_area" . $request->obj_city;
             $user = Auth::user();
@@ -177,106 +183,73 @@ class ObjectsRepository extends Repository {
         }
     }
 
-    private function validateObject($data) {
-        switch ($data["obj_type"]) {
+    private function checkObject($object)
+    {
+        $query = \App\Object::select("*");
+        switch ($object->obj_type) {
             case "1":
-                $errors = array();
-                $allow_inputs = ["obj_deal", "obj_form_1", "obj_city", "obj_address", "obj_room", "obj_floor", "obj_square", "obj_square_kitchen", "obj_square_life", "obj_build_type_1", "obj_home_floors_1", "obj_desc", "obj_price_square", "obj_price", "obj_doplata", "obj_geo", "client_name", "client_phone"];
-                foreach ($allow_inputs as $allow_input) {
-                    if(!isset($data[$allow_input])) {
-                        $errors[] = "Поле " . $allow_input . " обязательно к заполнению.";
-                    }
-                }
-                if (count($errors) > 0) {
-                    return ["errors" => $errors];
-                } else {
-                    return false;
-                }
+                $query->whereCategory(1);
+                $query->whereRooms($object->obj_room);
+                $query->whereSquare($object->obj_square);
+                $query->whereFloor($object->obj_floor);
+                $query->whereBuild_floors($object->obj_home_floors_1);
+                // ADDRESS
+//                $words = preg_replace('[улица]','', $object->obj_address);
+//                $words = mb_strtolower($words);
+//                $words = trim($words);
+//                $words = quotemeta($words);
+//                $words = preg_replace('[^a-zA-ZА-Яа-я0-9\s]','', $words);
+//                $arraywords = explode(" " ,$words);
+//                foreach ($arraywords as $word) {
+//                    $query->where("address", "LIKE", "%$word%");
+//                }
+                //GEO
+                $query->whereGeo($object->obj_geo);
+                return $query->first();
                 break;
             case "2":
-
+                $query->whereCategory(2);
+                $query->whereBuild_type($object->obj_build_type_2);
+                $query->whereHome_square($object->obj_house_square);
+                $query->whereType($object->obj_form_2);
+                $query->whereBuild_floors($object->obj_home_floors_2);
+                // ADDRESS
+//                $words = preg_replace('[улица]','', $object->obj_address);
+//                $words = mb_strtolower($words);
+//                $words = trim($words);
+//                $words = quotemeta($words);
+//                $words = preg_replace('[^a-zA-ZА-Яа-я0-9\s]','', $words);
+//                $arraywords = explode(" " ,$words);
+//                foreach ($arraywords as $word) {
+//                    $query->where("address", "LIKE", "%$word%");
+//                }
+                //GEO
+                $query->whereGeo($object->obj_geo);
+                return $query->first();
                 break;
             case "3":
-
+                $query->whereCategory(1);
+                $query->whereRooms($object->obj_room);
+                $query->whereSquare($object->obj_square);
+                $query->whereFloor($object->obj_floor);
+                $query->whereBuild_floors($object->obj_home_floors_1);
+                // ADDRESS
+//                $words = preg_replace('[улица]','', $object->obj_address);
+//                $words = mb_strtolower($words);
+//                $words = trim($words);
+//                $words = quotemeta($words);
+//                $words = preg_replace('[^a-zA-ZА-Яа-я0-9\s]','', $words);
+//                $arraywords = explode(" " ,$words);
+//                foreach ($arraywords as $word) {
+//                    $query->where("address", "LIKE", "%$word%");
+//                }
+                //GEO
+                $query->whereGeo($object->obj_geo);
+                return $query->first();
                 break;
             default:
                 break;
         }
-    }
-
-    private function checkObject($object)
-    {
-        $query = \App\Object::select("*");
-         switch ($object->category) {
-             case "1":
-                 $query->whereCategory(1);
-                 $query->whereRooms($object->rooms);
-                 $query->whereSquare($object->square);
-                 $query->whereFloor($object->floor);
-                 $query->whereBuild_floors($object->build_floors);
-                 // ADDRESS
-                 $words = mb_strtolower($object->address);
-                 $words = trim($words);
-                 $words = quotemeta($words);
-                 $words = preg_replace('|[^\d\w ]+|i','', $words);
-                 $arraywords = explode(" " ,$words);
-                 $count = 1;
-                 foreach ($arraywords as $word) {
-                     if ($count > 1) {
-                         $query->orWhere("address", "LIKE", "%$word%");
-                     } else {
-                         $query->where("address", "LIKE", "%$word%");
-                     }
-                 }
-                 return $query->firstOrFail();
-                break;
-             case "2":
-                 $query->whereCategory(2);
-                 $query->whereBuild_type($object->build_type);
-                 $query->whereHome_square($object->home_square);
-                 $query->whereType($object->type);
-                 $query->whereBuild_floors($object->build_floors);
-                 // ADDRESS
-                 $words = mb_strtolower($object->address);
-                 $words = trim($words);
-                 $words = quotemeta($words);
-                 $words = preg_replace('|[^\d\w ]+|i','', $words);
-                 $arraywords = explode(" " ,$words);
-                 $count = 1;
-                 foreach ($arraywords as $word) {
-                     if ($count > 1) {
-                         $query->orWhere("address", "LIKE", "%$word%");
-                     } else {
-                         $query->where("address", "LIKE", "%$word%");
-                     }
-                 }
-                 return $query->firstOrFail();
-                break;
-             case "3":
-                 $query->whereCategory(1);
-                 $query->whereRooms($object->rooms);
-                 $query->whereSquare($object->square);
-                 $query->whereFloor($object->floor);
-                 $query->whereBuild_floors($object->build_floors);
-                 // ADDRESS
-                 $words = mb_strtolower($object->address);
-                 $words = trim($words);
-                 $words = quotemeta($words);
-                 $words = preg_replace('|[^\d\w ]+|i','', $words);
-                 $arraywords = explode(" " ,$words);
-                 $count = 1;
-                 foreach ($arraywords as $word) {
-                     if ($count > 1) {
-                         $query->orWhere("address", "LIKE", "%$word%");
-                     } else {
-                         $query->where("address", "LIKE", "%$word%");
-                     }
-                 }
-                 return $query->firstOrFail();
-                break;
-             default:
-                break;
-         }
     }
 
 
@@ -656,14 +629,10 @@ class ObjectsRepository extends Repository {
                     $words = mb_strtolower($data["address"]);
                     $words = trim($words);
                     $words = quotemeta($words);
+                    $words = preg_replace('[^a-zA-ZА-Яа-я0-9\s]','', $words);
                     $arraywords = explode(" " ,$words);
-                    $count = 1;
                     foreach ($arraywords as $word) {
-                        if ($count > 1) {
-                            $query->orWhere("address", "LIKE", "%$word%");
-                        } else {
-                            $query->where("address", "LIKE", "%$word%");
-                        }
+                        $query->where("address", "LIKE", "%$word%");
                     }
                 }
                 $query->where("square", ">=", "$square_min");
@@ -708,14 +677,10 @@ class ObjectsRepository extends Repository {
                     $words = mb_strtolower($data["address"]);
                     $words = trim($words);
                     $words = quotemeta($words);
+                    $words = preg_replace('[^a-zA-ZА-Яа-я0-9\s]','', $words);
                     $arraywords = explode(" " ,$words);
-                    $count = 1;
                     foreach ($arraywords as $word) {
-                        if ($count > 1) {
-                            $query->orWhere("address", "LIKE", "%$word%");
-                        } else {
-                            $query->where("address", "LIKE", "%$word%");
-                        }
+                        $query->where("address", "LIKE", "%$word%");
                     }
                 }
                 $query->where("home_square", ">=", "$square_min");
@@ -763,14 +728,10 @@ class ObjectsRepository extends Repository {
                     $words = mb_strtolower($data["address"]);
                     $words = trim($words);
                     $words = quotemeta($words);
+                    $words = preg_replace('[^a-zA-ZА-Яа-я0-9\s]','', $words);
                     $arraywords = explode(" " ,$words);
-                    $count = 1;
                     foreach ($arraywords as $word) {
-                        if ($count > 1) {
-                            $query->orWhere("address", "LIKE", "%$word%");
-                        } else {
-                            $query->where("address", "LIKE", "%$word%");
-                        }
+                        $query->where("address", "LIKE", "%$word%");
                     }
                 }
                 $query->where("square", ">=", "$square_min");
