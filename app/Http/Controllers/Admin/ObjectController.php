@@ -345,6 +345,30 @@ class ObjectController extends AdminController
             return back()->with(['error' => 'Ошибка удаления']);
         }
     }
+
+    public function ShowPhone(Object $object) {
+//        сделать проверочки
+        $object->client = json_decode($object->client);
+        return response()->json([
+            'id'   => $object->id,
+            'name' => $object->client->name,
+            'phone' => preg_replace("/[^,.0-9]/", '', $object->createdUser->telefon)
+        ]);
+
+//        @can("viewContacts", Auth::user())
+//                                @if(isset($object->working_id))
+//            @if($object->workingUser->id == $user->id)
+//        {{$object->client->phone}} {{ $object->client->name }} {{$object->client->father_name}}
+//                                    @else
+//                                        {{$object->workingUser->telefon}} {{ $object->workingUser->name }}
+//                                    @endif
+//                                @else
+//                                    {{$object->client->phone}} {{ $object->client->name }} {{$object->client->father_name}}
+//                                @endif
+//                            @else
+//                                {{$object->createdUser->telefon}} {{ $object->createdUser->name }}
+//                            @endcan
+    }
     
     
 }

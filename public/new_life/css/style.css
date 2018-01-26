@@ -230,4 +230,16 @@ table {
   margin-top: 20px;
 }
 
+.button-text {
+  font-size: 12px;
+}
+
+.btn-phone {
+  padding: 3px;
+}
+
+.btn-phone span {
+  width: 100%;
+}
+
 /*# sourceMappingURL=style.css.map */

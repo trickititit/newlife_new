@@ -256,18 +256,6 @@
 
     });
 </script>
-<script type="text/javascript">
-    $(document).ready(function() {
-        $('.table tr').click(function () {
-            var tab_height = $(this).find('.tab_content').height();
-            if (tab_height == 70) {
-                $(this).find('.tab_content').stop(true).animate({ height: "250px"}, 300)
-            } else {
-                $(this).find('.tab_content').stop(true).animate({ height: "70px"}, 300)
-            }
-        });
-    });
-</script>
 
 <div class="modal fade" id="statsModal" tabindex="-1" role="dialog" aria-labelledby="statsModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
@@ -409,6 +397,31 @@
             }
         });
         initSlider("init");
+
+        $('.js-show-phone').click(function (e) {
+            e.preventDefault();
+            var href = $(this).attr('href');
+            $.ajax({
+                url: href,
+                success: function(data){
+                    var btn = $('.js-show-phone[data-id=' + data.id + ']');
+                    btn.removeClass('js-show-phone');
+                    btn.attr('href', "tel:" + data.phone);
+                    btn.find('span.js-name').html(data.name);
+                    btn.find('span.js-phone').html(data.phone);
+
+                }
+            });
+        });
+
+        $('.table tr').click(function () {
+            var tab_height = $(this).find('.tab_content').height();
+            if (tab_height == 70) {
+                $(this).find('.tab_content').stop(true).animate({ height: "250px"}, 300)
+            } else {
+                $(this).find('.tab_content').stop(true).animate({ height: "70px"}, 300)
+            }
+        });
     });
 </script>
 </body>

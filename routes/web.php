@@ -50,6 +50,7 @@ Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
         Route::delete('/delete/{aobject}',['uses'=>'Admin\AobjectController@destroy','as'=>'aobject.delete']);
         Route::delete('/softdelete/{object}',['uses'=>'Admin\ObjectController@softDelete','as'=>'object.softDelete']);
         Route::get('/export/{user?}',['uses'=>'Admin\ObjectController@export','as'=>'object.export']);
+        Route::get('/phone/{object}',['uses'=>'Admin\ObjectController@ShowPhone','as'=>'object.phone']);
     });
     Route::group(['prefix' => 'image'],function() {
         Route::post('/delete',['uses'=>'Admin\Storage@objDeleteImage','as'=>'adminObjDelImg']);

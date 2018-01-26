@@ -11,7 +11,6 @@
             <table class="table table-bordered table-hover table-sm">
                 <thead>
                 <tr>
-                    <th width="1">Сделка</th>
                     <th >Обьект</th>
                     <th >Адрес</th>
                     <th >Цена</th>
@@ -26,7 +25,6 @@
     @if($objects)
     @foreach($objects as $object)
                 <tr>
-                    <td class="td-icon"><div class="tab_content">{!!  $object->deal == "Продажа" ? "<i class=\"fa fa-shopping-cart fa-lg\"></i>" : "<i class=\"fa fa-retweet fa-lg\"></i>" !!}</div></td>
                     <td class="table-obj"><div class="tab_content">
                         @if($object->category == 1)
                             <a href="{{route('site.object',['object'=>$object->alias])}}">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ $object->created_at->format('m/d/Y') }}
@@ -43,19 +41,10 @@
                     <td><div class="tab_content">{{ number_format($object->surcharge) }}</div></td>
                     <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
                     <td class="table-contact"><div class="tab_content">
-                            @can("viewContacts", Auth::user())
-                                @if(isset($object->working_id))
-                                    @if($object->workingUser->id == $user->id)
-                                        {{$object->client->phone}} {{ $object->client->name }} {{$object->client->father_name}}
-                                    @else
-                                        {{$object->workingUser->telefon}} {{ $object->workingUser->name }}
-                                    @endif
-                                @else
-                                    {{$object->client->phone}} {{ $object->client->name }} {{$object->client->father_name}}
-                                @endif
-                            @else
-                                {{$object->createdUser->telefon}} {{ $object->createdUser->name }}
-                            @endcan
+                            <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
+                                <span class="button-text js-name">Показать</span><br>
+                                <span class="button-text js-phone"></span>
+                            </a>
                         </div></td>
                     <td class="table-actions"><div class="tab_content"><div class="btn-actions centovka">
                             {!! $actions["object".$object->id] !!}
