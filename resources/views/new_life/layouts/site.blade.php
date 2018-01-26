@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>{{ $title }}</title>
+    <link type="image/x-icon" rel="shortcut icon" href="{{ asset(config('settings.theme')) }}/img/favicon.ico"/>
 
     <script>
         window.Laravel = {!! json_encode([

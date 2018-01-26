@@ -3,6 +3,7 @@
 <head lang="{{ config('app.locale') }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="icon" href="{{ asset(config('settings.theme')) }}/img/favicon.ico"/>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">

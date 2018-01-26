@@ -628,7 +628,7 @@ class ObjectsRepository extends Repository {
                 $floor_max = ($data["floor_max"] == 31)? 99999: $data["floor_max"];
                 $floorInObj_min = ($data["floorInObj_1_min"] == 1)? 1: $data["floorInObj_1_min"];
                 $floorInObj_max = ($data["floorInObj_1_max"] == 31)? 999: $data["floorInObj_1_max"];
-                $price_min = ($data["price_min"]== 0)? 1: $data["price_min"];
+                $price_min = ($data["price_min"] < 0)? 0: $data["price_min"];
                 $price_max = ($data["price_max"]== 0)? 999999999: $data["price_max"];
                 $query->whereCategory($data["category"]);
                 if (isset($data["deal"])) {
@@ -683,7 +683,7 @@ class ObjectsRepository extends Repository {
                 $floorInObj_max = ($data["floorInObj_2_max"] == 5)? 99999: $data["floorInObj_2_max"];
                 $distance_min = ($data["distance_min"] == 0)? -1: $data["distance_min"];
                 $distance_max = ($data["distance_max"] == 100)? 99999: $data["distance_max"];
-                $price_min = ($data["price_min"]== 0)? 1: $data["price_min"];
+                $price_min = ($data["price_min"]< 0)? 0: $data["price_min"];
                 $price_max = ($data["price_max"]== 0)? 999999999: $data["price_max"];
                 $query->whereCategory($data["category"]);
                 if (isset($data["deal"])) {
@@ -735,7 +735,7 @@ class ObjectsRepository extends Repository {
                 $floor_max = ($data["floor_max"] == 31)? 99999: $data["floor_max"];
                 $floorInObj_min = ($data["floorInObj_1_min"] == 1)? 1: $data["floorInObj_1_min"];
                 $floorInObj_max = ($data["floorInObj_1_max"] == 31)? 999: $data["floorInObj_1_max"];
-                $price_min = ($data["price_min"]== 0)? 1: $data["price_min"];
+                $price_min = ($data["price_min"]< 0)? 0: $data["price_min"];
                 $price_max = ($data["price_max"]== 0)? 999999999: $data["price_max"];
                 $query->whereCategory($data["category"]);
                 if (isset($data["deal"])) {
