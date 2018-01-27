@@ -399,13 +399,18 @@
         initSlider("init");
 
         $('.js-show-phone').click(function (e) {
-            e.preventDefault();
             var href = $(this).attr('href');
+            var show = $(this).attr("data-show");
+            if(show == 'true') {
+                window.location = href;
+                return;
+            }
+            e.preventDefault();
             $.ajax({
                 url: href,
                 success: function(data){
                     var btn = $('.js-show-phone[data-id=' + data.id + ']');
-                    btn.removeClass('js-show-phone');
+                    btn.attr('data-show', true);
                     btn.attr('href', "tel:" + data.phone);
                     btn.find('span.js-name').html(data.name);
                     btn.find('span.js-phone').html(data.phone);
@@ -414,7 +419,7 @@
             });
         });
 
-        $('.table tr').click(function () {
+        $('.table .table-desc').click(function () {
             var tab_height = $(this).find('.tab_content').height();
             if (tab_height == 70) {
                 $(this).find('.tab_content').stop(true).animate({ height: "250px"}, 300)

@@ -90,6 +90,10 @@ class Object extends Model
         return $query->wherenotNull("working_id");
     }
 
+    public function scopeInNotWorkAll($query) {
+        return $query->whereNull("working_id");
+    }
+
     public function users(){
         return $this->belongsToMany('App\User');
     }

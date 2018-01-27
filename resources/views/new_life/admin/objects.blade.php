@@ -41,7 +41,7 @@
                     <td><div class="tab_content">{{ number_format($object->surcharge) }}</div></td>
                     <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
                     <td class="table-contact"><div class="tab_content">
-                            <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
+                            <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-show="false" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
                                 <span class="button-text js-name">Показать</span><br>
                                 <span class="button-text js-phone"></span>
                             </a>

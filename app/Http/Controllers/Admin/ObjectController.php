@@ -259,18 +259,18 @@ class ObjectController extends AdminController
     }
 
     public function CheckCompleted(Object $object){
-        if (request()->ip() != "193.124.189.57"){
-            abort(404);
-        }
-        $objects = $object->InWorkAll()->get();
+//        if (request()->ip() != "193.124.189.57"){
+//            abort(404);
+//        }
+        $objects = $object->InNotWorkAll()->get();
         foreach ($objects as $object) {
             if (!isset($object->activate_state)) {
                 $object->activate_state = 0;
             }
-            if($object->worked_at->addMonths(1 + $object->activate_state) < Carbon::now()) {
-                dump($object->worked_at->addMonths(1 + $object->activate_state));
+            if($object->created_at->addMonths(1 + $object->activate_state) < Carbon::now()) {
+                dump($object->created_at->addMonths(1 + $object->activate_state));
                 $object->activate_state++;
-                $user = $object->working_id;
+                $user = $object->created_id;
                 $object->completedUser()->associate($user);
                 $object->update();
             }
@@ -347,12 +347,17 @@ class ObjectController extends AdminController
     }
 
     public function ShowPhone(Object $object) {
-//        сделать проверочки
+        //сделать проверочки
         $object->client = json_decode($object->client);
+        $phone = preg_replace("/[^,.0-9]/", '', $object->createdUser->telefon);
+        if ($phone[0] == 8) {
+            $phone = substr( $phone, 1);
+            $phone = "+7" . $phone;
+        }
         return response()->json([
             'id'   => $object->id,
             'name' => $object->client->name,
-            'phone' => preg_replace("/[^,.0-9]/", '', $object->createdUser->telefon)
+            'phone' => $phone
         ]);
 
 //        @can("viewContacts", Auth::user())
