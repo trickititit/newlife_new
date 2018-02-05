@@ -594,6 +594,9 @@ class ObjectsRepository extends Repository {
         if (!isset($data["price_max"])) {
            $data["price_max"] = 0; 
         }
+        if (!isset($data["rieltor"])) {
+            $data["rieltor"] = "all";
+        }
         switch ($data["category"]) {
             case "1": $square_min = ($data["square_1_min"] == 10)? 1: $data["square_1_min"];
                 $square_max = ($data["square_1_max"] == 200)? 99999999: $data["square_1_max"];

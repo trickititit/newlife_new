@@ -10,7 +10,7 @@ class UserPolicy
     use HandlesAuthorization;
 
 
-    public function before($user, $ability)
+    public function before(User $user, $ability)
     {
         if ($user->isAdmin()) {
             return true;
@@ -19,7 +19,6 @@ class UserPolicy
 
     public function viewContacts(User $user)
     {
-
         $polices = $user->polices;
         foreach ($polices as $police) {
             if($police->id == 3) {

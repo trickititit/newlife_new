@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Object;
 use App\Aobject;
+use DOMDocument;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ObjectsRepository;
@@ -263,6 +265,11 @@ class ObjectController extends AdminController
 //            abort(404);
 //        }
         $objects = $object->InNotWorkAll()->get();
+////        dd($objects->toArray()[0]);
+//        $php_array = array("object" => $object->toArray());
+//        $xml = Array2XML::createXML('objects', $php_array);
+//        dd($xml->saveXML());
+
         foreach ($objects as $object) {
             if (!isset($object->activate_state)) {
                 $object->activate_state = 0;
@@ -347,32 +354,31 @@ class ObjectController extends AdminController
     }
 
     public function ShowPhone(Object $object) {
-        //сделать проверочки
+        $this->checkUser();
         $object->client = json_decode($object->client);
-        $phone = preg_replace("/[^,.0-9]/", '', $object->createdUser->telefon);
-        if ($phone[0] == 8) {
-            $phone = substr( $phone, 1);
-            $phone = "+7" . $phone;
+        if($this->user->can('viewContacts', $this->user)) {
+            if((isset($object->working_id) && $object->workingUser->id == $this->user->id) || !isset($object->working_id) || $this->user->isAdmin()) {
+                $phone = $object->client->phone;
+                $name = $object->client->name;
+            } else {
+                $phone = $object->workingUser->telefon;
+                $name = $object->workingUser->name;
+            }
+        } else {
+            $phone = $object->createdUser->telefon;
+            $name = $object->createdUser->name;
         }
+        //сделать проверочки
+        $phone = preg_replace("/[^,.0-9]/", '', $phone);
+        if ($phone[0] == 8 || $phone[0] == 7) {
+            $phone = substr( $phone, 1);
+        }
+        $phone = "+7" . $phone;
         return response()->json([
             'id'   => $object->id,
-            'name' => $object->client->name,
+            'name' => $name,
             'phone' => $phone
         ]);
-
-//        @can("viewContacts", Auth::user())
-//                                @if(isset($object->working_id))
-//            @if($object->workingUser->id == $user->id)
-//        {{$object->client->phone}} {{ $object->client->name }} {{$object->client->father_name}}
-//                                    @else
-//                                        {{$object->workingUser->telefon}} {{ $object->workingUser->name }}
-//                                    @endif
-//                                @else
-//                                    {{$object->client->phone}} {{ $object->client->name }} {{$object->client->father_name}}
-//                                @endif
-//                            @else
-//                                {{$object->createdUser->telefon}} {{ $object->createdUser->name }}
-//                            @endcan
     }
     
     
