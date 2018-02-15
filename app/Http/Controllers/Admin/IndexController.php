@@ -136,6 +136,7 @@ class IndexController extends AdminController {
                     $data["area".$data["city"]][$i] = $area[0]->name;
                 }
             }
+            //скать по ИД
             $data["city_id"] = $data["city"];
             if ($data["city"] == 1) {
                 $data["city"] = "Волгоград";
@@ -233,15 +234,36 @@ class IndexController extends AdminController {
 
     private function getActions($object, $user, $type) {
         switch ($type) {
-            case "inwork":
+            case "outed":
                 $editlink = route('object.edit',['object'=>$object->alias]);
                 $unworklink = route('object.unwork',['object'=>$object->alias]);
+                $unoutlink = route('object.unout',['object'=>$object->alias]);
                 $uninwork = "<form action='$unworklink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Убрать из работы'><i class=\"fa fa-gear fa-lg\"></i></button></form>";
                 $deletelink = route('object.softDelete',['object'=>$object->alias]);
                 $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                 $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
-                $favorites = "";
-                return $edit.$uninwork.$favorites.$delete;
+                $unout = "<form action='$unoutlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Убрать с выгрузки'><i class=\"fa fa-times fa-lg\"></i></button></form>";
+                return $edit.$uninwork.$unout.$delete;
+            case "myouted":
+                $editlink = route('object.edit',['object'=>$object->alias]);
+                $unworklink = route('object.unwork',['object'=>$object->alias]);
+                $unoutlink = route('object.unout',['object'=>$object->alias]);
+                $uninwork = "<form action='$unworklink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Убрать из работы'><i class=\"fa fa-gear fa-lg\"></i></button></form>";
+                $deletelink = route('object.softDelete',['object'=>$object->alias]);
+                $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
+                $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
+                $unout = "<form action='$unoutlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Убрать с выгрузки'><i class=\"fa fa-times fa-lg\"></i></button></form>";
+                return $edit.$uninwork.$unout.$delete;
+            case "inwork":
+                $editlink = route('object.edit',['object'=>$object->alias]);
+                $unworklink = route('object.unwork',['object'=>$object->alias]);
+                $outlink = route('object.out',['object'=>$object->alias]);
+                $uninwork = "<form action='$unworklink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Убрать из работы'><i class=\"fa fa-gear fa-lg\"></i></button></form>";
+                $deletelink = route('object.softDelete',['object'=>$object->alias]);
+                $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
+                $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
+                $out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
+                return $edit.$uninwork.$out.$delete;
             case "prework":
                 $who = $object->preworkingUser->name;
                 $acceptlink = route('object.accessPreWork',['object'=>$object->alias]);

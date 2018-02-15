@@ -10,7 +10,7 @@ class Object extends Model
 {
     use SoftDeletes;
 
-    protected $dates = ['deleted_at', "activate_at", "created_at", "updated_at", "worked_at"];
+    protected $dates = ['deleted_at', "activate_at", "created_at", "updated_at", "worked_at", "outed_at"];
     
     public function comforts(){
         return $this->belongsToMany('App\Comfort');
@@ -88,6 +88,15 @@ class Object extends Model
 
     public function scopeInWorkAll($query) {
         return $query->wherenotNull("working_id");
+    }
+
+    public function scopeOuted($query) {
+        return $query->whereOut("1");
+    }
+
+    public function scopeMyOuted($query) {
+        $user_id = Auth::user()->id;
+        return $query->whereOut("1")->whereCreated_id($user_id);
     }
 
     public function scopeInNotWorkAll($query) {

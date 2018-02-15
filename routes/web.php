@@ -12,11 +12,19 @@ Route::get('/curlAvitoK/', ['uses' => 'IndexController@curlAvitoK', 'as' => 'obj
 Route::get('/curlAvitoH/', ['uses' => 'IndexController@curlAvitoH', 'as' => 'object.curlParseH']);
 Route::get('/curlAvitoC/', ['uses' => 'IndexController@curlAvitoC', 'as' => 'object.curlParseC']);
 Route::get('/checkactivate', ['uses' => 'Admin\ObjectController@checkCompleted', 'as' => 'object.check.completed']);
+Route::get('/districts', ['uses' => 'Admin\ObjectController@CreateDistricts', 'as' => 'object.createDistricts']);
 Route::get('/js/{file}', function($file = null)
 {
     $path = storage_path().'/app/public/new_life/js/'.$file.".js";
     if (file_exists($path)) {
         return response()->download($path)->deleteFileAfterSend(true);
+    }
+});
+Route::get('/avitoXml', function($file = null)
+{
+    $path = storage_path().'/app/public/new_life/xml/avito.xml';
+    if (file_exists($path)) {
+        return response()->download($path);
     }
 });
 
@@ -42,6 +50,8 @@ Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
         Route::put('/favorite/{object}',['uses'=>'Admin\FavoriteController@Favorite','as'=>'object.favorite']);
         Route::put('/afavorite/{aobject}',['uses'=>'Admin\FavoriteController@AFavorite','as'=>'aobject.favorite']);
         Route::put('/prework/{object}',['uses'=>'Admin\ObjectController@InPrework','as'=>'object.prework']);
+        Route::put('/out/{object}',['uses'=>'Admin\ObjectController@Out','as'=>'object.out']);
+        Route::delete('/unout/{object}',['uses'=>'Admin\ObjectController@UnOut','as'=>'object.unout']);
         Route::put('/unwork/{object}',['uses'=>'Admin\ObjectController@Unwork','as'=>'object.unwork']);
         Route::put('/accessprework/{object}',['uses'=>'Admin\ObjectController@AccessPrework','as'=>'object.accessPreWork']);
         Route::put('/cancelprework/{object}',['uses'=>'Admin\ObjectController@CancelPrework','as'=>'object.cancelPreWork']);

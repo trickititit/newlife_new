@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Object;
 use App\Aobject;
-use DOMDocument;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\ObjectsRepository;
@@ -13,11 +11,13 @@ use App\Repositories\CitiesRepository;
 use App\Repositories\AreasRepository;
 use App\Repositories\ComfortsRepository;
 use App\Components\JavaScriptMaker;
+use App\Components\Array2XML;
 use App\Components\ExcelExport;
 use App\Http\Requests\ObjectRequest;
 use Gate;
 use Carbon\Carbon;
 use File;
+use Storage;
 
 class ObjectController extends AdminController
 {
@@ -216,11 +216,42 @@ class ObjectController extends AdminController
     public function InPrework(Object $object)
     {
         $this->checkUser();
+//        dd($object);
+        dd($this->ObjectsToXml($object));
+//        dd($this->ObjectToArray($object));
         $object->preworkingUser()->associate($this->user);
         if ($object->update()) {
             return back()->with(['status' => 'Объект добавлен в работу']);
         } else {
             return back()->with(['error' => 'Ошибка добавления в работу']);
+        }
+    }
+
+    public function Out(Object $object)
+    {
+        $this->checkUser();
+        $object->outed_at = Carbon::now();
+        $object->out = 1;
+        if ($object->update()) {
+            $objects = Object::Outed()->get();
+            $this->ObjectsToXml($objects);
+            return back()->with(['status' => 'Объект добавлен на выгрузку']);
+        } else {
+            return back()->with(['error' => 'Ошибка добавления на выгрузку']);
+        }
+    }
+
+    public function UnOut(Object $object)
+    {
+        $this->checkUser();
+        $object->outed_at = null;
+        $object->out = 0;
+        if ($object->update()) {
+            $objects = Object::Outed()->get();
+            $this->ObjectsToXml($objects);
+            return back()->with(['status' => 'Объект удален из выгрузку']);
+        } else {
+            return back()->with(['error' => 'Ошибка удаления из выгрузки']);
         }
     }
 
@@ -265,11 +296,6 @@ class ObjectController extends AdminController
 //            abort(404);
 //        }
         $objects = $object->InNotWorkAll()->get();
-////        dd($objects->toArray()[0]);
-//        $php_array = array("object" => $object->toArray());
-//        $xml = Array2XML::createXML('objects', $php_array);
-//        dd($xml->saveXML());
-
         foreach ($objects as $object) {
             if (!isset($object->activate_state)) {
                 $object->activate_state = 0;
@@ -379,6 +405,151 @@ class ObjectController extends AdminController
             'name' => $name,
             'phone' => $phone
         ]);
+    }
+
+    public function createDistricts(){
+       $objects = Object::select("*")->withTrashed()->get();
+       foreach ($objects as $object) {
+           if (preg_match("/Квартал/i", $object->raion->name)) {
+               $object->district = "Старый город";
+               if ($object->update()) {
+                   dump("Вхождение найдено." . $object->raion->name);
+               }
+           } else {
+               $object->district = "Новый город";
+               if ($object->update()) {
+                   dump("Вхождение не найдено." . $object->raion->name);
+               }
+           }
+       }
+    }
+
+    public function ObjectsToXml($objects) {
+        $objectar = array();
+        foreach($objects as $object) {
+            $objectar[] = $this->ObjectToArray($object);
+        }
+        $php_array = array("Ad" => $objectar);
+        $php_array["@attributes"] = array("target" => "Avito.ru", "formatVersion" => 3);
+        $xml = Array2XML::createXML('Ads', $php_array);
+        Storage::disk('xml')->put('avito.xml', $xml->saveXML());
+    }
+
+    private function ObjectToArray(Object $object) {
+        $geo = explode(",", $object->geo);
+        $companyName = "Новая Жизнь";
+        $region = "Волгоградская область";
+        $rights = "Посредник";
+        $obj = array();
+        switch ($object->category) {
+            case "1":
+                $obj["id"] = $object->id;
+                $obj{"Category"} = "Квартиры";
+                $obj{"OperationType"} = "Продам";
+                //поменять
+                $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
+                $obj["Description"] = $object->desc;
+                $obj["AdStatus"] = "Free";
+                $obj["EMail"] = $object->createdUser->email;
+                $obj["CompanyName"] = $companyName;
+                $obj["ManagerName"] = $object->createdUser->name;
+                $obj["ContactPhone"] = $object->createdUser->telefon;
+                $obj["Region"] = $region;
+                $obj["City"] = $object->gorod->name;
+                $obj["District"] = $object->district;
+                $obj["Street"] = $object->address;
+                $obj["Latitude"] = trim($geo[0]);
+                $obj["Longitude"] = trim($geo[1]);
+                $obj["Price"] = $object->price;
+                $obj["Floor"] = $object->floor;
+                $obj["Floors"] = $object->build_floors;
+                $obj["Rooms"] = $object->rooms;
+                $obj["HouseType"] = $object->build_type;
+                $obj["Square"] = $object->square;
+                $obj["LivingSpace"] = $object->square_life;
+                $obj["KitchenSpace"] = $object->square_kitchen;
+                $obj["MarketType"] = $object->type;
+                $obj["PropertyRights"] = $rights;
+                if ($object->images->isNotEmpty()) {
+                    $images = array();
+                    foreach ($object->images as $image) {
+                        $images[] = array("@attributes" => array("src" => asset(config('settings.theme'))."/uploads/images/".$image->object_id."/".$image->new_name));
+                    }
+                    $obj["Images"] = array("Image" => $images);
+                }
+                break;
+            case "2":
+                $obj["id"] = $object->id;
+                $obj{"Category"} = "Дома, дачи, коттеджи";
+                $obj{"OperationType"} = "Продам";
+                //поменять
+                $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
+                $obj["Description"] = $object->desc;
+                $obj["AdStatus"] = "Free";
+                $obj["EMail"] = $object->createdUser->email;
+                $obj["CompanyName"] = $companyName;
+                $obj["ManagerName"] = $object->createdUser->name;
+                $obj["ContactPhone"] = $object->createdUser->telefon;
+                $obj["Region"] = $region;
+                $obj["City"] = $object->gorod->name;
+                $obj["District"] = $object->district;
+                $obj["Street"] = $object->address;
+                $obj["Latitude"] = trim($geo[0]);
+                $obj["Longitude"] = trim($geo[1]);
+                $obj["Price"] = $object->price;
+                $obj["ObjectType"] = $object->type;
+                $obj["Floors"] = $object->build_floors;
+                $obj["WallsType"] = $object->build_type;
+                $obj["Square"] = $object->home_square;
+                //так?
+                $obj["LandArea"] = $object->earth_square;
+                $obj["PropertyRights"] = $rights;
+                $obj["DistanceToCity"] = $object->distance;
+                if ($object->images->isNotEmpty()) {
+                    $images = array();
+                    foreach ($object->images as $image) {
+                        $images[] = array("@attributes" => array("src" => asset(config('settings.theme'))."/uploads/images/".$image->object_id."/".$image->new_name));
+                    }
+                    $obj["Images"] = array("Image" => $images);
+                }
+                break;
+            case "3":
+                $obj["id"] = $object->id;
+                $obj{"Category"} = "Комнаты";
+                $obj{"OperationType"} = "Продам";
+                //поменять
+                $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
+                $obj["Description"] = $object->desc;
+                $obj["AdStatus"] = "Free";
+                $obj["EMail"] = $object->createdUser->email;
+                $obj["CompanyName"] = $companyName;
+                $obj["ManagerName"] = $object->createdUser->name;
+                $obj["ContactPhone"] = $object->createdUser->telefon;
+                $obj["Region"] = $region;
+                $obj["City"] = $object->gorod->name;
+                $obj["District"] = $object->district;
+                $obj["Street"] = $object->address;
+                $obj["Latitude"] = trim($geo[0]);
+                $obj["Longitude"] = trim($geo[1]);
+                $obj["Price"] = $object->price;
+                $obj["Floor"] = $object->floor;
+                $obj["Floors"] = $object->build_floors;
+                $obj["Rooms"] = $object->rooms;
+                $obj["HouseType"] = $object->build_type;
+                $obj["Square"] = $object->square;
+                $obj["PropertyRights"] = $rights;
+                if ($object->images->isNotEmpty()) {
+                    $images = array();
+                    foreach ($object->images as $image) {
+                        $images[] = array("@attributes" => array("src" => asset(config('settings.theme'))."/uploads/images/".$image->object_id."/".$image->new_name));
+                    }
+                    $obj["Images"] = array("Image" => $images);
+                }
+                break;
+            default:
+                break;
+        }
+        return $obj;
     }
     
     

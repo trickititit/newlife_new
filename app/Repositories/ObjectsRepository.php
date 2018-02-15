@@ -20,7 +20,7 @@ class ObjectsRepository extends Repository {
         $this->model = $object;
         $this->i_rep = $i_rep;
         $this->c_rep = $c_rep;
-                $this->a_rep = $a_rep;
+        $this->a_rep = $a_rep;
 
     }
 
@@ -190,7 +190,7 @@ class ObjectsRepository extends Repository {
             case "1":
                 $query->whereCategory(1);
                 $query->whereRooms($object->obj_room);
-                $query->whereSquare($object->obj_square);
+//                $query->whereSquare($object->obj_square);
                 $query->whereFloor($object->obj_floor);
                 $query->whereBuild_floors($object->obj_home_floors_1);
                 // ADDRESS
@@ -210,7 +210,7 @@ class ObjectsRepository extends Repository {
             case "2":
                 $query->whereCategory(2);
                 $query->whereBuild_type($object->obj_build_type_2);
-                $query->whereHome_square($object->obj_house_square);
+//                $query->whereHome_square($object->obj_house_square);
                 $query->whereType($object->obj_form_2);
                 $query->whereBuild_floors($object->obj_home_floors_2);
                 // ADDRESS
@@ -230,7 +230,7 @@ class ObjectsRepository extends Repository {
             case "3":
                 $query->whereCategory(1);
                 $query->whereRooms($object->obj_room);
-                $query->whereSquare($object->obj_square);
+//                $query->whereSquare($object->obj_square);
                 $query->whereFloor($object->obj_floor);
                 $query->whereBuild_floors($object->obj_home_floors_1);
                 // ADDRESS
@@ -525,6 +525,58 @@ class ObjectsRepository extends Repository {
                             $result = $this->model->Completed()->orderBy($order[0], $order[1])->paginate($pagination);
                         } else {
                             $result = $this->model->Completed()->orderBy($order)->paginate($pagination);
+                        }
+                    }
+                }
+                break;
+            case "outed":
+                if (Input::has("search")) {
+                    $data = Input::except("search");
+                    if ($count) {
+                        $result = $this->model->Outed()->count();
+                    } else {
+                        if (is_array($order)) {
+                            $query = $this->model->Outed()->orderBy($order[0], $order[1]);
+                            $result = $this->searchObject($data, $pagination, $query);
+                        } else {
+                            $query = $this->model->Outed()->orderBy($order);
+                            $result = $this->searchObject($data, $pagination, $query);
+                        }
+                    }
+                } else {
+                    if ($count) {
+                        $result = $this->model->Outed()->count();
+                    } else {
+                        if (is_array($order)) {
+                            $result = $this->model->Outed()->orderBy($order[0], $order[1])->paginate($pagination);
+                        } else {
+                            $result = $this->model->Outed()->orderBy($order)->paginate($pagination);
+                        }
+                    }
+                }
+                break;
+            case "myouted":
+                if (Input::has("search")) {
+                    $data = Input::except("search");
+                    if ($count) {
+                        $result = $this->model->MyOuted()->count();
+                    } else {
+                        if (is_array($order)) {
+                            $query = $this->model->MyOuted()->orderBy($order[0], $order[1]);
+                            $result = $this->searchObject($data, $pagination, $query);
+                        } else {
+                            $query = $this->model->MyOuted()->orderBy($order);
+                            $result = $this->searchObject($data, $pagination, $query);
+                        }
+                    }
+                } else {
+                    if ($count) {
+                        $result = $this->model->MyOuted()->count();
+                    } else {
+                        if (is_array($order)) {
+                            $result = $this->model->MyOuted()->orderBy($order[0], $order[1])->paginate($pagination);
+                        } else {
+                            $result = $this->model->MyOuted()->orderBy($order)->paginate($pagination);
                         }
                     }
                 }

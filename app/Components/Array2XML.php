@@ -9,6 +9,9 @@
 namespace App\Components;
 
 
+use DOMDocument;
+use Exception;
+
 class Array2XML
 {
     private static $xml = null;

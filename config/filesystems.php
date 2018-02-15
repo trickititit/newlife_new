@@ -62,6 +62,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'xml' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public/'.env('THEME','default').'/xml'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
+        ],
+
         'phantom' => [
             'driver' => 'local',
             'root' => base_path("phantomjs/bin"),
