@@ -470,6 +470,7 @@ class ObjectController extends AdminController
                 $obj["KitchenSpace"] = $object->square_kitchen;
                 $obj["MarketType"] = $object->type;
                 $obj["PropertyRights"] = $rights;
+                $obj["CadastralNumber"] = $object->cadarstral;
                 if ($object->images->isNotEmpty()) {
                     $images = array();
                     foreach ($object->images as $image) {
@@ -505,6 +506,7 @@ class ObjectController extends AdminController
                 $obj["LandArea"] = $object->earth_square;
                 $obj["PropertyRights"] = $rights;
                 $obj["DistanceToCity"] = $object->distance;
+                $obj["CadastralNumber"] = $object->cadarstral;
                 if ($object->images->isNotEmpty()) {
                     $images = array();
                     foreach ($object->images as $image) {
@@ -538,6 +540,7 @@ class ObjectController extends AdminController
                 $obj["HouseType"] = $object->build_type;
                 $obj["Square"] = $object->square;
                 $obj["PropertyRights"] = $rights;
+                $obj["CadastralNumber"] = $object->cadarstral;
                 if ($object->images->isNotEmpty()) {
                     $images = array();
                     foreach ($object->images as $image) {

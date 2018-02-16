@@ -330,6 +330,14 @@
                             </div>
                         </div>
                     </div>
+                    <div id="cadastral" class="form-group row">
+                        <label for="obj_doplata" class="col-sm-2 form-label semibold">Кадастровый номер</label>
+                        <div class="col-sm-10 col-md-4">
+                            <div class="form-control-wrapper form-control-icon-right">
+                                {!! Form::text('obj_cadastral', isset($object->cadastral)? $object->cadastral : old("obj_cadastral"), ["class" => "form-control"]) !!}
+                            </div>
+                        </div>
+                    </div>
                 </section>
                 <h3>Клиент</h3>
                 <section>
