@@ -72,10 +72,11 @@ class UsersRepository extends Repository
         $user->telefon = $data['telefon'];
         $user->login = $data['login'];
         $user->email = $data['email'];
+        //@TODO:Чтото с правами
         if ($this->user->can('editPolice',$this->user) && isset($data['role'])) {
             $user->role_id = $data['role'];
         } else {
-            $user->role_id = 2;
+            $user->role_id = 3;
         }
         if ($this->user->can('editPolice', $this->user) && isset($data["polices"])) {
             $user->polices()->sync($data["polices"]);
