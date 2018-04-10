@@ -217,7 +217,7 @@ class ObjectController extends AdminController
     {
         $this->checkUser();
 //        dd($object);
-        dd($this->ObjectsToXml($object));
+//        dd($this->ObjectsToXml($object));
 //        dd($this->ObjectToArray($object));
         $object->preworkingUser()->associate($this->user);
         if ($object->update()) {
