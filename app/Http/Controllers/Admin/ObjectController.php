@@ -216,9 +216,6 @@ class ObjectController extends AdminController
     public function InPrework(Object $object)
     {
         $this->checkUser();
-//        dd($object);
-//        dd($this->ObjectsToXml($object));
-//        dd($this->ObjectToArray($object));
         $object->preworkingUser()->associate($this->user);
         if ($object->update()) {
             return back()->with(['status' => 'Объект добавлен в работу']);
@@ -438,13 +435,13 @@ class ObjectController extends AdminController
 
     private function ObjectToArray(Object $object) {
         $geo = explode(",", $object->geo);
-        $companyName = "Новая Жизнь";
+        $companyName = "АН \"Новая Жизнь\"";
         $region = "Волгоградская область";
         $rights = "Посредник";
         $obj = array();
         switch ($object->category) {
             case "1":
-                $obj["id"] = $object->id;
+                $obj["id"] = md5($object->id);
                 $obj{"Category"} = "Квартиры";
                 $obj{"OperationType"} = "Продам";
                 //поменять
@@ -481,7 +478,7 @@ class ObjectController extends AdminController
                 }
                 break;
             case "2":
-                $obj["id"] = $object->id;
+                $obj["id"] = md5($object->id);
                 $obj{"Category"} = "Дома, дачи, коттеджи";
                 $obj{"OperationType"} = "Продам";
                 //поменять
@@ -517,7 +514,7 @@ class ObjectController extends AdminController
                 }
                 break;
             case "3":
-                $obj["id"] = $object->id;
+                $obj["id"] = md5($object->id);
                 $obj{"Category"} = "Комнаты";
                 $obj{"OperationType"} = "Продам";
                 //поменять

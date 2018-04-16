@@ -1,5 +1,5 @@
 
-                // Example using HTTP POST operation
+                    // Example using HTTP POST operation
 
 "use strict";
 
@@ -11,14 +11,8 @@ useragent.push('Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 
 useragent.push('Opera/12.02 (Android 4.1; Linux; Opera Mobi/ADR-1111101157; U; en-US) Presto/2.9.201 Version/12.02');
 
 //Здесь находится страничка, которую нужно спарсить
-var parseUrl = '/volgogradskaya_oblast_volzhskiy/kvartiry/2-k_kvartira_43.6_m_55_et._979759640';
-var title = '2-к квартира, 43.6 м², 5/5 эт.';
-var job = {title: title, url: parseUrl, phone: "", address: "", city: "", price: "", category: "", title_obj: "", contact_name: "", desc : "", person_name : "", id : "", date: ""};                               
+var parseUrl = 'https://m.avito.ru/volgogradskaya_oblast_volzhskiy/komnaty/prodam?user=1';
 var jobs_list = [];
-var debug = false;
-var click_count = 0;
-var arr_debug = [];
-var click = false;
 var page = require('webpage').create();
 
 // Это я передаю заголовки
@@ -77,9 +71,6 @@ function mouseclick( element ) {
 // final function called, output screenshot, exit
 //noinspection JSAnnotator
 function after_clicked( page, job ) {
-        if (debug) {  
-           arr_debug.push((new Date().getTime() - arr_debug[0]) + " late ms. this after");  
-        }
             job.title_obj = page.evaluate(function() {
                 return [].map.call(document.querySelectorAll('.semantic-text'), function (span) {
                     return span.innerText;
@@ -90,16 +81,6 @@ function after_clicked( page, job ) {
             });
             job.id = page.evaluate(function() {
                 return document.querySelector('.item-id').innerText;
-            });
-            job.geo = page.evaluate(function() {
-                var div_geo = document.querySelector('#item-map');
-                if (div_geo !== null) {
-                    var attr_1 = div_geo.getAttribute('data-coords-lat');
-                    var attr_2 = div_geo.getAttribute('data-coords-lng');
-                    return attr_1 + "," + attr_2;
-                } else {
-                    return "none";
-                }
             });
             job.contact_name = page.evaluate(function() {
                 var name = document.querySelector('.person-contact-name');
@@ -130,27 +111,20 @@ function after_clicked( page, job ) {
                 return document.querySelector('.user-address-text').innerText;
             });
             job.phone = page.evaluate(function () {
-                return document.querySelector('.action-show-number .js-phone-number').innerText;
+                return document.querySelector('.action-show-number span').innerText;
             });
             job.price = page.evaluate(function () {
                 return document.querySelector('.price-value').innerText;
             });
             console.log(JSON.stringify(job));
-            if (debug) {
-              for (var f = 0; f < arr_debug.length; f++) {
-                    console.log(JSON.stringify(arr_debug[f]));
-                }
-            }
-            phantom.exit( 1 );
+
+            return true;
 }
 
-function checkClick (page) {
-    if(debug) {
-       arr_debug.push((new Date().getTime() - arr_debug[0]) + " late ms. this check click");
-    }
-    click_count++;
-     if (!click || click_count > 4) {
-            var clicked = page.evaluate(
+// middle function, click on desired tab
+//noinspection JSAnnotator
+function click_div( page, job ) {
+    var clicked = page.evaluate(
         function ( mouseclick_fn ) {
             // want the div with class "submenu"
             var element = document.querySelector( "a.action-show-number" );
@@ -162,127 +136,93 @@ function checkClick (page) {
             return true;
         }, mouseclick
     );
-    click = clicked;
-     }
-    if ( ! click ) {
+
+    if ( ! clicked ) {
         console.log( job.url);
         console.log( "Failed to find desired element" );
         phantom.exit( 1 );
         return;
-        } else {
-            var result =  page.evaluate(function() {
-                var txt = document.querySelector( "a.action-show-number .js-phone-number" ).innerText;
-                if (!txt.indexOf('XX-XX') + 1) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-            return result;
-    }
+    } else {
+        window.setTimeout(
+            function () {
+                return after_clicked( page, job );
+            },
+            1500);
+        }
 }
 
-// middle function, click on desired tab
-//noinspection JSAnnotator
-function click_div( page, job ) {
-        if (debug) {  
-           arr_debug.push((new Date().getTime() - arr_debug[0]) + " late ms. this div click");  
-        }
-        waitFor(  function () {
-                    return checkClick( page);
-                },
-                function () {
-                    after_clicked( page, job );
-                }, 7000);
-}
-
-
-function next_page(page, job) {
-        if (debug) {
-            arr_debug.push(new Date().getTime());  
-           arr_debug.push(new Date().getTime() + " start parse ms.");  
-        }
-       page.open("https://m.avito.ru" + job.url, function (status) {
+function next_page(i, page, list) {
+    if (i <= (list.length - 1)) {
+        var current_job = list[i];
+        var url = current_job.url;
+        page.open("https://m.avito.ru" + url, function (status) {
             if (status !== 'success') {
                 console.log('Unable to access network');
             } else {
-               click_div( page, job );
+                window.setTimeout(function () {
+                        click_div( page, current_job );
+                    },
+                    500
+                );
+                window.setTimeout(function () {
+                    next_page(++i, page, list);
+                }, 3000);
             }
         });
+    } else {
+        phantom.exit();
+    }
 }
 
 
-function doit(page, link, list_jobs) {
-    // console.log( link );
+function doit(page, link, list_jobs, pagenumber) {
+   //console.log( link );
     page.open(link, function (status) {
         if (status !== 'success') {
             console.log('Unable to access network');
-        } else {
+        } else {           
             var list = page.evaluate(function () {
                 var job;
                 var jobs = [];
-                var objs = document.querySelectorAll('article.b-item');
+                var objs = document.querySelectorAll('article.b-item:not(.item-vip)');
                     for (var i = 0; i < objs.length; i++) {
+                        var id_ = objs[i].getAttribute('data-item-id');
                         var title = objs[i].querySelector('h3');
                         var url = objs[i].querySelector('a');
-                        job = {title: title.innerText, url: url.getAttribute('href'), phone: "", address: "", city: "", price: "", category: "", title_obj: "", contact_name: "", desc : "", person_name : "", id : "", date : "", geo : ""};
+                        job = {title: title.innerText, url: url.getAttribute('href'), id: id_};
                         jobs.push(job);
                     }
                 return jobs;
             });
-            // for (var f = 0; f < list.length; f++) {
-            //     console.log(JSON.stringify(list[f]));
-            // }
-            // console.log("");
+//             for (var f = 0; f < list.length; f++) {
+//                 console.log(JSON.stringify(list[f]));
+//             }
             var arre = list_jobs.concat(list);
-            var next = page.evaluate(function () {
-                return document.querySelector(".page-next a");
+            var allpages = page.evaluate(function () {
+                var inner = document.querySelector('.nav-helper-content.nav-helper-text');
+                if (inner != null) {
+                    return inner.innerText;
+                } else {
+                    return 1;
+                }                
             });
-            if (next !== "") {
-                var href = page.evaluate(function () {
-                    var next = document.querySelector(".page-next a");
-                    return next.getAttribute('href');
-                });
-                href = "https://m.avito.ru" + href;
-                window.setTimeout(
-                    function () {
-                        doit(page, href, arre);
-                    },
-                    1000
-                );
-            } else {
-                var i = 0;
+            var maxpages = (Math.ceil(allpages / 20)) + 1;
+            if (pagenumber < maxpages) {
+                pagenumber++;
+                var href = parseUrl + "&p=" + pagenumber;
+//                console.log(href);
                 window.setTimeout(function () {
-                    next_page(i, page, arre);
-                }, 3000);
+                    doit(page, href, arre, pagenumber);
+                }, 2000);              
+            } else {
+                for (var f = 0; f < arre.length; f++) {
+                    console.log(JSON.stringify(arre[f]));
+                }
+                phantom.exit( 1 );
             }
         }
     });
 }
 
-function waitFor(testFx, onReady, timeOutMillis) {
-    var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 3000, //< Default Max Timout is 3s
-        start = new Date().getTime(),
-        condition = false,
-        interval = setInterval(function() {
-            if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
-                // If not time-out yet and condition not yet fulfilled
-                condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
-            } else {
-                if(!condition) {
-                    // If condition still not fulfilled (timeout but condition is 'false')
-                    //console.log("'waitFor()' timeout");
-                    phantom.exit(1);
-                } else {
-                    // Condition fulfilled (timeout and/or condition is 'true')
-                    //console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
-                    typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
-                    clearInterval(interval); //< Stop this interval
-                }
-            }
-        }, 1500); //< repeat check every 250ms
-};
-
-
-next_page(page, job);
+doit(page, parseUrl, jobs_list, 1);
                 

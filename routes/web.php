@@ -9,8 +9,11 @@ Route::post('/sendmail/', ['uses' => 'MailController@sendRequest', 'as' => 'site
 Route::post('/sendmailcall/', ['uses' => 'MailController@sendCall', 'as' => 'site.sendCall']);
 Route::post('/sendtelegram/', ['uses' => 'TelegramController@sendMessage', 'as' => 'site.sendTelegram']);
 Route::get('/curlAvitoK/', ['uses' => 'IndexController@curlAvitoK', 'as' => 'object.curlParseK']);
+Route::get('/curlAvitoKA/', ['uses' => 'IndexController@curlAvitoKA', 'as' => 'object.curlParseKA']);
 Route::get('/curlAvitoH/', ['uses' => 'IndexController@curlAvitoH', 'as' => 'object.curlParseH']);
+Route::get('/curlAvitoHA/', ['uses' => 'IndexController@curlAvitoHA', 'as' => 'object.curlParseHA']);
 Route::get('/curlAvitoC/', ['uses' => 'IndexController@curlAvitoC', 'as' => 'object.curlParseC']);
+Route::get('/curlAvitoCA/', ['uses' => 'IndexController@curlAvitoCA', 'as' => 'object.curlParseCA']);
 Route::get('/checkactivate', ['uses' => 'Admin\ObjectController@checkCompleted', 'as' => 'object.check.completed']);
 Route::get('/districts', ['uses' => 'Admin\ObjectController@CreateDistricts', 'as' => 'object.createDistricts']);
 Route::get('/js/{file}', function($file = null)
@@ -20,11 +23,11 @@ Route::get('/js/{file}', function($file = null)
         return response()->download($path)->deleteFileAfterSend(true);
     }
 });
-Route::get('/avitoXml', function($file = null)
+Route::get('/xml/avito.xml', function($file = null)
 {
     $path = storage_path().'/app/public/new_life/xml/avito.xml';
     if (file_exists($path)) {
-        return response()->download($path);
+        return response()->file($path);
     }
 });
 

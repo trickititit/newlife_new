@@ -3371,7 +3371,7 @@ page.customHeaders = {
     \"user-agent\": useragent[Math.floor(Math.random() * useragent.length)]
 };
 
-// Здесь я отключаю загрузку сторонних скриптов для ускореняи парсинга
+//// Здесь я отключаю загрузку сторонних скриптов для ускореняи парсинга
 page.onResourceRequested = function (requestData, request) {
     if ((/http:\/\/.+?\.css$/gi).test(requestData['url'])) {
         request.abort();
@@ -3393,7 +3393,7 @@ page.onResourceRequested = function (requestData, request) {
 page.onError = function (msg, trace) {
     console.log(msg);
     trace.forEach(function (item) {
-        console.log('  ', item.file, ':', item.line);
+//        console.log('  ', item.file, ':', item.line);
     });
 };
 
@@ -3458,6 +3458,7 @@ function after_clicked( page, job ) {
                 return document.querySelector('.price-value').innerText;
             });
             console.log(JSON.stringify(job));
+           
 
             return true;
 }

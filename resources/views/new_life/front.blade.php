@@ -53,24 +53,24 @@
                     @if($object->images->isNotEmpty())
                         @foreach($object->images as $image)
                             <div class="img_offer" style="background: url({{ asset(config('settings.theme')) }}/uploads/images/{{$image->object_id}}/{{$image->new_name}} ) no-repeat center center; background-size: cover;">
-                                @break
-                                @endforeach
-                                @else
-                                    <div class="img_offer" style="background: url({{ asset(config('settings.theme')) }}/img/img-task.jpg) no-repeat center center ; background-size: cover;">
-                                        @endif
-                                    </div>
-                                    <span class="text_offer">
-                                @if($object->category == 1)
-                                            {{$object->rooms}}-к квартира {{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.
-                                        @elseif($object->category == 2)
-                                            {{$object->type}} {{$object->home_square}} м² на участке {{$object->earth_square}}
-                                        @elseif($object->category == 3)
-                                            Комната в {{$object->rooms}}-к {{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.
-                                        @endif
-                            </span>
-                                    <span class="text_offer">{{ $object->getViewAddress() }}</span>
-                                    <span class="text_offer">{{ $object->getViewPrice() }} р.</span>
-                                    {{--<span class="desc_offer">{{ mb_strimwidth($object->desc, 0, 100, "...") }}</span>--}}
+                        @break
+                        @endforeach
+                    @else
+                        <div class="img_offer" style="background: url({{ asset(config('settings.theme')) }}/img/no-images.jpg) no-repeat center center ; background-size: cover;">
+                    @endif
+                            </div>
+                            <span class="text_offer">
+                        @if($object->category == 1)
+                                    {{$object->rooms}}-к квартира {{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.
+                                @elseif($object->category == 2)
+                                    {{$object->type}} {{$object->home_square}} м² на участке {{$object->earth_square}}
+                                @elseif($object->category == 3)
+                                    Комната в {{$object->rooms}}-к {{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.
+                                @endif
+                    </span>
+                            <span class="text_offer">{{ $object->getViewAddress() }}</span>
+                            <span class="text_offer">{{ $object->getViewPrice() }} р.</span>
+                            {{--<span class="desc_offer">{{ mb_strimwidth($object->desc, 0, 100, "...") }}</span>--}}
                 </a>
             </div>
         @endforeach

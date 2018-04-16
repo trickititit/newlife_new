@@ -142,6 +142,8 @@ class IndexController extends AdminController {
                 $data["city"] = "Волгоград";
             } else if($data["city"] == 2) {
                 $data["city"] = "Волжский";
+            } else if($data["city"] == 3) {
+                $data["city"] = "Средняя Ахтуба";
             }
             $objects = $this->aobj_rep->searchObject($data, 40, $order);
             $objects->appends(request()->input());

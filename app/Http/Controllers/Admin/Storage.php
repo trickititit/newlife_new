@@ -56,9 +56,16 @@ class Storage extends Controller
                 }
                 $img_model->save();
                 $img->save($uploadDir . $image_path);
-                $img->fit(1500, 1000)->save($uploadDir . $image_thumb_path);
+                $img->fit($this->getWidthImg($img, 550), 550)->save($uploadDir . $image_thumb_path);
             }
         }
+    }
+
+    private function getWidthImg($img, $need_height) {
+        $height = $img->height();
+        $width = $img->width();
+        return intval($width / ($height / $need_height));
+
     }
 
     private function getex($filename) {

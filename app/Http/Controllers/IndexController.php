@@ -70,11 +70,33 @@ class IndexController extends SiteController
         $this->objectAvitoToBase($output, $jsmaker);
     }
 
+    public function curlAvitoKA(JavaScriptMaker $jsmaker) {
+        if (request()->ip() != "193.124.189.57"){
+            abort(404);
+        }
+        $url = "https://m.avito.ru/srednyaya_ahtuba/kvartiry/prodam/vtorichka?user=1";
+        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+        exec($cmd, $output);
+        $this->objectAvitoToBase($output, $jsmaker);
+    }
+
     public function curlAvitoH(JavaScriptMaker $jsmaker) {
         if (request()->ip() != "193.124.189.57"){
             abort(404);
         }
         $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/doma_dachi_kottedzhi/prodam?user=1";
+        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+        exec($cmd, $output);
+        $this->objectAvitoToBase($output, $jsmaker);
+    }
+
+    public function curlAvitoHA(JavaScriptMaker $jsmaker) {
+        if (request()->ip() != "193.124.189.57"){
+            abort(404);
+        }
+        $url = "https://m.avito.ru/srednyaya_ahtuba/doma_dachi_kottedzhi/prodam?user=1";
         $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
         $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
         exec($cmd, $output);
@@ -92,6 +114,17 @@ class IndexController extends SiteController
         $this->objectAvitoToBase($output, $jsmaker);
     }
 
+    public function curlAvitoCA(JavaScriptMaker $jsmaker) {
+        if (request()->ip() != "193.124.189.57"){
+            abort(404);
+        }
+        $url = "https://m.avito.ru/srednyaya_ahtuba/komnaty/prodam?user=1";
+        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+        exec($cmd, $output);
+        $this->objectAvitoToBase($output, $jsmaker);
+    }
+
     public function checkArray($array, $type) {
         if (!preg_match("/\\d\\-к/", $array[1 + $type]) && $array[1 + $type] != "Студия") {
             array_splice($array, 1 + $type, 1);
@@ -100,11 +133,22 @@ class IndexController extends SiteController
         return $array;
     }
 
+    function isStart($str, $substr)
+    {
+        $result = strpos($str, $substr);
+        if ($result === 0) { // если содержится, начиная с первого символа
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function objectAvitoToBase($objects, $jsmaker){
         $result = ["success" => 0, "error" => 0,"have" => 0, "object_s" => "", "object_e" => "", "object_h" => ""];
         $text = "";
         $i = 0;
         foreach ($objects as $object_) {
+            if(!$this->isStart($object_, "{")) continue;
             $parseobject = json_decode($object_);
             if ($this->aobj_rep->getOne($parseobject->id)) {
                 continue;
@@ -112,8 +156,13 @@ class IndexController extends SiteController
             $req = [$parseobject->title, $parseobject->url];
             $jsmaker->setJs("parse-avito-page", $req, true, "", $this->randStr);
             $cmd = "phantomjs ".base_path("phantomjs/bin/avito.js");
-            exec($cmd, $output);
-            $object = json_decode($output[$i]);
+            exec($cmd, $outputs);
+            $object_avito = "";
+            foreach ($outputs as $output) {
+                if(!$this->isStart($object_, "{")) continue;
+                $object_avito = $output;
+            }
+            $object = json_decode($object_avito);
             $object->category = mb_strtolower($object->category);
             if ($object->category == "квартиры") {
                 $object->category = 1;
@@ -226,7 +275,7 @@ class IndexController extends SiteController
         $build_types = ["Кирпичный", "Панельный", "Блочный", "Монолитный", "Деревянный"];
         $search_types = ["дом", "дачу", "коттедж", "таунхаус"];
         $types = ["Дом", "Дача", "Коттедж", "Таунхаус"];
-        $search_build_types_2 = ["кирпич", "брус", "бревно", "газоблоки", "металл", "пеноблоки", "сендвич-панели", "ж/б панели", "экспериментальные материалы"];
+        $search_build_types_2 = ["кирпич", "брус", "бревно", "газоблоки", "металл", "пеноблоки", "сэндвич-панели", "ж/б панели", "экспериментальные материалы"];
         $build_types_2 = ["Кирпич", "Брус", "Бревно", "Металл", "Газоблоки", "Пеноблоки", "Сендвич-панели", "Ж/б панели", "Экспериментальные материалы"];
         switch ($category) {
             case '1':
@@ -314,7 +363,7 @@ class IndexController extends SiteController
                         break;
                     case 'build_floors':
                         for ($i = 1; $i < 11; $i++) {
-                            if (preg_match("~".$i."\\-этажный~", $string[2])) {
+                            if (preg_match("/.*(".$i.".*\-этажный|".$i."\-этажный).*/", $string[2])) {
                                 return $i;
                             }
                         }
