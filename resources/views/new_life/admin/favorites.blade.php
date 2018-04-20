@@ -30,11 +30,11 @@
                             <div class="col-md-4">
                                 @if($object->images->isNotEmpty())
                                     @foreach($object->images as $image)
-                                        <img src="{{ asset(config('settings.theme')) }}/uploads/images/{{$image->object_id}}/{{$image->new_name}}" class="img-responsive">
+                                        <img src="{{ asset(config('settings.theme')) }}/uploads/images/{{$image->object_id}}/{{$image->new_name}}" class="img-fluid">
                                         @break
                                     @endforeach
                                 @else
-                                    <img src="{{ asset(config('settings.theme')) }}/img/no-images.jpg" class="img-responsive">
+                                    <img src="{{ asset(config('settings.theme')) }}/img/no-images.jpg" class="img-fluid">
                                 @endif
                             </div>
                             <div class="col-md-6">

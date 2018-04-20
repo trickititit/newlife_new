@@ -33,7 +33,7 @@
                 <div class="col-md-4">
                     <ul class="contacts">
                         <li><i class="fa fa-mobile fa-2x" aria-hidden="true"></i>
-                            9-919-792-07-42</li>
+                            +7-909-380-27-63</li>
                         <li><i class="fa fa-map-marker fa-2x" aria-hidden="true"></i>
                             г. Волжский</li>
                         <li>Профсоюзов 16</li>

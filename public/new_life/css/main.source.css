@@ -7206,19 +7206,24 @@ a.label-light-grey:hover {
 .table.font-16 {
   font-size: 1rem;
 }
-.table-hover tbody tr:hover {
-  background: #fbfcfd;
-}
+
 .table-striped tbody tr:nth-of-type(odd) {
   background: none;
 }
 .table-striped tbody tr:nth-of-type(even) {
-  background-color: #fbfcfd;
+  background-color: #b3b3b44d;
 }
+
+.table-hover tbody tr:hover {
+  background: rgba(179, 179, 180, 0.46);
+
+}
+
 .table-active,
 .table-active > td,
 .table-active > th {
   background-color: #ecf2f5;
+
 }
 .table-success,
 .table-success > td,

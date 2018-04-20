@@ -8,7 +8,7 @@
         {!! Form::select('order', $order_select, $selected, ["onchange" => "window.location.href=this.options[this.selectedIndex].value", "id" => "order"]) !!}
     </ul>
     <!-- Таблица -->
-            <table class="table table-bordered table-hover table-sm">
+            <table class="table table-striped table-bordered table-hover table-sm">
                 <thead>
                 <tr>
                     <th >Обьект</th>
@@ -22,38 +22,38 @@
                 </tr>
                 </thead>
                 <tbody>
-    @if($objects)
-    @foreach($objects as $object)
-                <tr>
-                    <td class="table-obj"><div class="tab_content">
-                        @if($object->category == 1)
-                            <a href="{{route('site.object',['object'=>$object->alias])}}">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ $object->created_at->format('m/d/Y') }}
-                        @elseif($object->category == 2)
-                            <a href="{{route('site.object',['object'=>$object->alias])}}">{{$object->type}}</a><br>{{$object->home_square}} м² на участке {{$object->earth_square}}<br>{{ $object->created_at->format('m/d/Y') }}
-                        @elseif($object->category == 3)
-                            <a href="{{route('site.object',['object'=>$object->alias])}}">Комната в {{$object->rooms}}-к</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ $object->created_at->format('m/d/Y') }}
-                        @endif
-                        </div>
-                    </td>
-                    <td class="table-address"><div class="tab_content">{{ $object->address }},<br>{{ str_replace(array("микрорайон", "улица", "Квартал", "квартал", "поселок"), array("мкр", "ул", "кв-л", "кв-л", "п"), $object->raion->name) }}, <br> {{ $object->gorod->name }}</div></td>
-                    <td><div class="tab_content">{{ number_format($object->price) }}</div></td>
-                    <td class="table-desc"><div class="tab_content">{{ $object->desc }}</div></td>
-                    <td><div class="tab_content">{{ number_format($object->surcharge) }}</div></td>
-                    <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
-                    <td class="table-contact"><div class="tab_content">
-                            <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-show="false" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
-                                <span class="button-text js-name">Показать</span><br>
-                                <span class="button-text js-phone"></span>
-                            </a>
-                        </div></td>
-                    <td class="table-actions"><div class="tab_content"><div class="btn-actions centovka">
-                            {!! $actions["object".$object->id] !!}
-                         </div>
-                        </div>
-                    </td>
-                </tr>
-    @endforeach
-    @endif
+                    @if($objects)
+                    @foreach($objects as $object)
+                                <tr>
+                                    <td class="table-obj"><div class="tab_content">
+                                        @if($object->category == 1)
+                                            <a href="{{route('site.object',['object'=>$object->alias])}}">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ $object->created_at->format('d/m/Y') }}
+                                        @elseif($object->category == 2)
+                                            <a href="{{route('site.object',['object'=>$object->alias])}}">{{$object->type}}</a><br>{{$object->home_square}} м² на участке {{$object->earth_square}}<br>{{ $object->created_at->format('d/m/Y') }}
+                                        @elseif($object->category == 3)
+                                            <a href="{{route('site.object',['object'=>$object->alias])}}">Комната в {{$object->rooms}}-к</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ $object->created_at->format('d/m/Y') }}
+                                        @endif
+                                        </div>
+                                    </td>
+                                    <td class="table-address"><div class="tab_content">{{ $object->address }},<br>{{ str_replace(array("микрорайон", "улица", "Квартал", "квартал", "поселок"), array("мкр", "ул", "кв-л", "кв-л", "п"), $object->raion->name) }}, <br> {{ $object->gorod->name }}</div></td>
+                                    <td><div class="tab_content">{{ number_format($object->price) }}</div></td>
+                                    <td class="table-desc"><div class="tab_content">{{ $object->desc }}</div></td>
+                                    <td><div class="tab_content">{{ number_format($object->surcharge) }}</div></td>
+                                    <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
+                                    <td class="table-contact"><div class="tab_content">
+                                            <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-show="false" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
+                                                <span class="button-text js-name">Показать</span><br>
+                                                <span class="button-text js-phone"></span>
+                                            </a>
+                                        </div></td>
+                                    <td class="table-actions"><div class="tab_content"><div class="btn-actions centovka">
+                                            {!! $actions["object".$object->id] !!}
+                                         </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                    @endforeach
+                    @endif
                 </tbody>
             </table>
         <div class="pagina col-md-12">

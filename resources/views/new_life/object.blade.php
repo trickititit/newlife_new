@@ -71,7 +71,7 @@
                                     @break
                                     @endforeach
                                     @else
-                                        <div class="img_offer" style="background: url({{ asset(config('settings.theme')) }}/img/img-task.jpg) no-repeat center center ; background-size: cover;">
+                                        <div class="img_offer" style="background: url({{ asset(config('settings.theme')) }}/img/no-images.jpg) no-repeat center center ; background-size: cover; outline: rgba(0,0,0,.08) solid 1px;">
                                             @endif
                                         </div>
                                         <span class="text_offer">

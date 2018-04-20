@@ -34,7 +34,7 @@ class NewsController extends AdminController
     public function index()
     {
         $this->checkUser();
-        $news = $this->n_rep->get();
+        $news = $this->n_rep->get("*", false, false, false, false, ["created_at", "desc"]);
         $this->content = view(config('settings.theme').'.admin.news')->with(array("news" => $news))->render();
         $this->title = 'Новости';
         return $this->renderOutput();
