@@ -275,11 +275,13 @@ class IndexController extends AdminController {
                 $canсell = "<form action='$canсelllink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Отклонить'><i class=\"fa fa-ban fa-lg\"></i></button></form>";
                 return $who_pre.$accept.$canсell;
             case "completed":
+                $editlink = route('object.edit',['object'=>$object->alias]);
                 $acceptlink = route('object.activate',['object'=>$object->alias]);
                 $deletelink = route('object.softDelete',['object'=>$object->alias]);
+                $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
                 $accept = "<form action='$acceptlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Активировать'><i class=\"fa fa-bell fa-lg\"></i></button></form>";
                 $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
-                return $accept.$delete;
+                return $edit.$accept.$delete;
             case "deleted":
                 $who = $object->deletedUser->name;
                 $acceptlink = route('object.destroy',['object'=>$object->alias]);

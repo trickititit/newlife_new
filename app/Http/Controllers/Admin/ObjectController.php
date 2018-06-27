@@ -319,7 +319,7 @@ class ObjectController extends AdminController
             $object->activate_state = 1;
         }
         if ($object->update()) {
-            return redirect(route("object.edit", ["object" => $object->alias]))->with(['status' => 'Объект активирован']);
+            return back()->with(['status' => 'Объект активирован']);
         } else {
             return back()->with(['error' => 'Ошибка активацции']);
         }
