@@ -200,31 +200,31 @@ class ObjectController extends AdminController
 
     //ACTIONS
 
-    public function destroy(Object $object)
+    public function destroy(Object $object, Request $request)
     {
         $this->checkUser();
         if($this->user->cant('delete', $object)) {
             return back()->with(array('error' => 'Доступ запрещен'));
         }
         if ($object->forceDelete()) {
-            return back()->with(['status' => 'Объект удален']);
+            return back()->with(['status' => 'Объект удален', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка удаления']);
+            return back()->with(['error' => 'Ошибка удаления', 'offset' => $request->offset]);
         }
     }
 
-    public function InPrework(Object $object)
+    public function InPrework(Object $object, Request $request)
     {
         $this->checkUser();
         $object->preworkingUser()->associate($this->user);
         if ($object->update()) {
-            return back()->with(['status' => 'Объект добавлен в работу']);
+            return back()->with(['status' => 'Объект добавлен в работу', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка добавления в работу']);
+            return back()->with(['error' => 'Ошибка добавления в работу', 'offset' => $request->offset]);
         }
     }
 
-    public function Out(Object $object)
+    public function Out(Object $object, Request $request)
     {
         $this->checkUser();
         $object->outed_at = Carbon::now();
@@ -232,13 +232,13 @@ class ObjectController extends AdminController
         if ($object->update()) {
             $objects = Object::Outed()->get();
             $this->ObjectsToXml($objects);
-            return back()->with(['status' => 'Объект добавлен на выгрузку']);
+            return back()->with(['status' => 'Объект добавлен на выгрузку', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка добавления на выгрузку']);
+            return back()->with(['error' => 'Ошибка добавления на выгрузку', 'offset' => $request->offset]);
         }
     }
 
-    public function UnOut(Object $object)
+    public function UnOut(Object $object, Request $request)
     {
         $this->checkUser();
         $object->outed_at = null;
@@ -246,13 +246,13 @@ class ObjectController extends AdminController
         if ($object->update()) {
             $objects = Object::Outed()->get();
             $this->ObjectsToXml($objects);
-            return back()->with(['status' => 'Объект удален из выгрузку']);
+            return back()->with(['status' => 'Объект удален из выгрузку', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка удаления из выгрузки']);
+            return back()->with(['error' => 'Ошибка удаления из выгрузки', 'offset' => $request->offset]);
         }
     }
 
-    public function AccessPrework(Object $object)
+    public function AccessPrework(Object $object, Request $request)
     {
         $this->checkUser();
         $user = $object->preworkingUser;
@@ -260,35 +260,35 @@ class ObjectController extends AdminController
         $object->workingUser()->associate($user);
         $object->preworkingUser()->dissociate();
         if ($object->update()) {
-            return back()->with(['status' => 'Объект принят в работу']);
+            return back()->with(['status' => 'Объект принят в работу', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка принятия в работу']);
+            return back()->with(['error' => 'Ошибка принятия в работу', 'offset' => $request->offset]);
         }
     }
 
-    public function CancelPrework(Object $object)
+    public function CancelPrework(Object $object, Request $request)
     {
         $this->checkUser();
         $object->preworkingUser()->dissociate();
         if ($object->update()) {
-            return back()->with(['status' => 'Объект принят в работу']);
+            return back()->with(['status' => 'Объект принят в работу', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка принятия в работу']);
+            return back()->with(['error' => 'Ошибка принятия в работу', 'offset' => $request->offset]);
         }
     }
 
-    public function Unwork(Object $object)
+    public function Unwork(Object $object, Request $request)
     {
         $this->checkUser();
         $object->workingUser()->dissociate();
         if ($object->update()) {
-            return back()->with(['status' => 'Объект убран из работы']);
+            return back()->with(['status' => 'Объект убран из работы', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка удаления из работы']);
+            return back()->with(['error' => 'Ошибка удаления из работы', 'offset' => $request->offset]);
         }
     }
 
-    public function CheckCompleted(Object $object){
+    public function CheckCompleted(Object $object, Request $request){
 //        if (request()->ip() != "193.124.189.57"){
 //            abort(404);
 //        }
@@ -307,7 +307,7 @@ class ObjectController extends AdminController
         }
     }
 
-    public function Activate(Object $object)
+    public function Activate(Object $object, Request $request)
     {
         $this->checkUser();
         $object->activate_at = Carbon::now();
@@ -319,26 +319,25 @@ class ObjectController extends AdminController
             $object->activate_state = 1;
         }
         if ($object->update()) {
-            return back()->with(['status' => 'Объект активирован']);
+            return back()->with(['status' => 'Объект активирован', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка активацции']);
+            return back()->with(['error' => 'Ошибка активацции', 'offset' => $request->offset]);
         }
     }
 
-    public function Restore(Object $object)
+    public function Restore(Object $object, Request $request)
     {
         $this->checkUser();
         $object->deletedUser()->dissociate();
         $object->update();
         if ($object->restore()) {
-            return redirect(route("object.edit", ["object" => $object->alias]))->with(['status' => 'Объект активирован']);
-            return back()->with(['status' => 'Объект восстановлен']);
+            return back()->with(['status' => 'Объект восстановлен', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка восстановления']);
+            return back()->with(['error' => 'Ошибка восстановления', 'offset' => $request->offset]);
         }
     }
 
-    public function softDelete(Object $object)
+    public function softDelete(Object $object, Request $request)
     {
         $this->checkUser();
         if($this->user->cant('softdelete', $object)) {
@@ -347,9 +346,9 @@ class ObjectController extends AdminController
         $object->deletedUser()->associate($this->user);
         $object->update();
         if ($object->delete()) {
-            return back()->with(['status' => 'Объект удален']);
+            return back()->with(['status' => 'Объект удален', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка удаления']);
+            return back()->with(['error' => 'Ошибка удаления', 'offset' => $request->offset]);
         }
     }
     
@@ -367,13 +366,13 @@ class ObjectController extends AdminController
         }
     }
 
-    public function AobjDelete(Aobject $aobject)
+    public function AobjDelete(Aobject $aobject, Request $request)
     {
         $this->checkUser();
         if ($aobject->delete()) {
-            return back()->with(['status' => 'Объект удален']);
+            return back()->with(['status' => 'Объект удален', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка удаления']);
+            return back()->with(['error' => 'Ошибка удаления', 'offset' => $request->offset]);
         }
     }
 
@@ -384,13 +383,16 @@ class ObjectController extends AdminController
             if((isset($object->working_id) && $object->workingUser->id == $this->user->id) || !isset($object->working_id) || $this->user->isAdmin()) {
                 $phone = $object->client->phone;
                 $name = $object->client->name;
+                $father_name = $object->client->father_name;
             } else {
                 $phone = $object->workingUser->telefon;
                 $name = $object->workingUser->name;
+                $father_name = '';
             }
         } else {
             $phone = $object->createdUser->telefon;
             $name = $object->createdUser->name;
+            $father_name = '';
         }
         //сделать проверочки
         $phone = preg_replace("/[^,.0-9]/", '', $phone);
@@ -401,7 +403,8 @@ class ObjectController extends AdminController
         return response()->json([
             'id'   => $object->id,
             'name' => $name,
-            'phone' => $phone
+            'phone' => $phone,
+            'father_name' => $father_name
         ]);
     }
 

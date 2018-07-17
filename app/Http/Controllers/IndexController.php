@@ -17,6 +17,7 @@ use Menu;
 use Gate;
 use URL;
 use Route;
+use Auth;
 
 class IndexController extends SiteController
 {
@@ -41,7 +42,16 @@ class IndexController extends SiteController
         $this->area_rep = $area_rep;
     }
 
+    public function reconstruction() {
+        $this->title = "Агенство недвижимости Новая Жизнь";
+        return view(config('settings.theme').'.reconstruct');
+    }
+
     public function index(JavaScriptMaker $jsmaker, Post $post, Object $object) {
+        $this->user = Auth::user();
+        if(!$this->user) {
+            return redirect('/reconstruct');
+        }
         $this->title = "Агенство недвижимости Новая Жизнь";
         $inwork = $object->InWorkAll()->take(10)->get();
         $posts = $post->OnMain()->get();

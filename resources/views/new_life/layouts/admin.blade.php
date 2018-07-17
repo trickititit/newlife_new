@@ -205,6 +205,11 @@
         });
     </script>
 @endif
+@if (session('offset'))
+    <script>
+        $(document).scrollTop({{session('offset')}});
+    </script>
+@endif
 <!-- END SCRIPT INCLUDE -->
 <script src="{{ asset(config('settings.theme')) }}/js/app.js"></script>
 <script src="{{ url("js/script-".$str) }}"></script>
@@ -375,6 +380,38 @@
 </div>
 <script>
     $(document).ready(function() {
+        $('.btn-actions form:not(.favor)').submit(function (e) {
+            var offset = $(window).scrollTop();
+            $(this).append('<input name="offset" value="' + offset + '" type="hidden">');
+            $(this).submit();
+        });
+
+
+        $('.js-show-phone').click(function (e) {
+            var href = $(this).attr('href');
+            e.preventDefault();
+            $.ajax({
+                url: href,
+                success: function(data){
+                    var btn = $('.js-show-phone[data-id=' + data.id + ']');
+                    btn.attr('data-show', true);
+                    btn.attr('href', "tel:" + data.phone);
+                    btn.find('span.js-name').html(data.name);
+                    btn.find('span.js-father_name').html(data.father_name);
+                    btn.find('span.js-phone').html(data.phone);
+
+                }
+            });
+        });
+
+        $('.table .table-desc').click(function () {
+            var tab_height = $(this).find('.tab_content').height();
+            if (tab_height == 70) {
+                $(this).parent().find('.tab_content').stop(true).animate({ height: "250px"}, 300)
+            } else {
+                $(this).parent().find('.tab_content').stop(true).animate({ height: "70px"}, 300)
+            }
+        });
         $("[data-popover=true]").webuiPopover({
             type: 'html',
             content: function () {
@@ -397,36 +434,6 @@
             }
         });
         initSlider("init");
-
-        $('.js-show-phone').click(function (e) {
-            var href = $(this).attr('href');
-            var show = $(this).attr("data-show");
-            if(show == 'true') {
-                window.location = href;
-                return;
-            }
-            e.preventDefault();
-            $.ajax({
-                url: href,
-                success: function(data){
-                    var btn = $('.js-show-phone[data-id=' + data.id + ']');
-                    btn.attr('data-show', true);
-                    btn.attr('href', "tel:" + data.phone);
-                    btn.find('span.js-name').html(data.name);
-                    btn.find('span.js-phone').html(data.phone);
-
-                }
-            });
-        });
-
-        $('.table .table-desc').click(function () {
-            var tab_height = $(this).find('.tab_content').height();
-            if (tab_height == 70) {
-                $(this).parent().find('.tab_content').stop(true).animate({ height: "250px"}, 300)
-            } else {
-                $(this).parent().find('.tab_content').stop(true).animate({ height: "70px"}, 300)
-            }
-        });
     });
 </script>
 </body>

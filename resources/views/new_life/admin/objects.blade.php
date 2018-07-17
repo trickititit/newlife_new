@@ -1,9 +1,7 @@
     {!! $filter !!}
-
-
     <ul class="nav nav-tabs">
     @if($menus)
-                @include(config('settings.theme').'.admin.objectsMenuItems',['items'=>$menus->roots(), "type" => $type])
+        @include(config('settings.theme').'.admin.objectsMenuItems',['items'=>$menus->roots(), "type" => $type])
     @endif
         {!! Form::select('order', $order_select, $selected, ["onchange" => "window.location.href=this.options[this.selectedIndex].value", "id" => "order"]) !!}
     </ul>
@@ -42,7 +40,7 @@
                                     <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
                                     <td class="table-contact"><div class="tab_content">
                                             <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-show="false" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
-                                                <span class="button-text js-name">Показать</span><br>
+                                                <span class="button-text js-name">Показать</span>  <span class="button-text js-father_name"></span><br>
                                                 <span class="button-text js-phone"></span>
                                             </a>
                                         </div></td>

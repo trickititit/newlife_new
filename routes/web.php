@@ -1,5 +1,9 @@
 <?php
 
+Route::get('/reconstruct', ['uses' => 'IndexController@reconstruction', 'as' => 'site.recon']);
+
+Auth::routes();
+
 Route::get('/', ['uses' => 'IndexController@index', 'as' => 'site.index']);
 
 Route::get('/object/{object}', ['uses' => 'ObjectController@index', 'as' => 'site.object']);
@@ -30,8 +34,6 @@ Route::get('/xml/avito.xml', function($file = null)
         return response()->file($path);
     }
 });
-
-Auth::routes();
 //admin
 Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
 //

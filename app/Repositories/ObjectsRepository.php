@@ -24,7 +24,7 @@ class ObjectsRepository extends Repository {
 
     }
 
-   public function addObject($request) {
+   public function addObject($request, $area = null) {
         if ($request->has("obj_type")) {
             $check = $this->checkObject($request);
             if($check){
@@ -41,7 +41,7 @@ class ObjectsRepository extends Repository {
                 $this->model->deal = $request->obj_deal;
                 $this->model->type = $request->obj_form_1;
                 $this->model->city = $request->obj_city;
-                $this->model->area = $request->input($obj_area_input);
+                $this->model->area = ($area != null) ? $area  :$request->input($obj_area_input);
                 $this->model->address = $request->obj_address;
                 $this->model->rooms = $request->obj_room;
                 $this->model->floor = $request->obj_floor;
@@ -89,7 +89,7 @@ class ObjectsRepository extends Repository {
                     $this->model->deal = $request->obj_deal;
                     $this->model->type = $request->obj_form_2;
                     $this->model->city = $request->obj_city;
-                    $this->model->area = $request->input($obj_area_input);
+                    $this->model->area = ($area != null) ? $area  :$request->input($obj_area_input);
                     $this->model->address = $request->obj_address;
                     $this->model->home_square = $request->obj_house_square;
                     $this->model->build_type = $request->obj_build_type_2;
@@ -135,7 +135,7 @@ class ObjectsRepository extends Repository {
                     $this->model->deal = $request->obj_deal;
                     $this->model->type = $request->obj_form_3;
                     $this->model->city = $request->obj_city;
-                    $this->model->area = $request->input($obj_area_input);
+                    $this->model->area = ($area != null) ? $area  :$request->input($obj_area_input);
                     $this->model->address = $request->obj_address;
                     $this->model->rooms = $request->obj_room;
                     $this->model->floor = $request->obj_floor;

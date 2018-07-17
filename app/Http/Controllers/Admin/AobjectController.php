@@ -80,7 +80,12 @@ class AobjectController extends AdminController
         $this->inputs = array_add($this->inputs, "obj_city", $obj_city);
         $comforts = $this->com_rep->get();
         $jsmaker->setJs("obj-edit", $aobject, true, csrf_token(), $this->randStr);
-        $aobject->client_contacts = substr( $aobject->client_contacts, 1);
+        //сделать проверочки
+        $phone = preg_replace("/\D/", '', $aobject->client_contacts);
+        if ($phone[0] == 8 || $phone[0] == 7) {
+            $phone = substr( $phone, 1);
+        }
+        $aobject->client_contacts = $phone;
         $this->content = view(config('settings.theme').'.admin.objectTransfer')->with(array("object" => $aobject,'cities' => $cities, "obj_id" => $aobject->id, "comforts" => $comforts, "inputs" => $this->inputs, 'obj_param' => $obj_param, 'category' => '', 'deal' => '', 'type' => ''))->render();
         $this->title = 'Трансфер объекта';
         return $this->renderOutput();
@@ -91,8 +96,8 @@ class AobjectController extends AdminController
         $this->checkUser();
         $request->obj_city = $this->getCityid($request->obj_city); 
         $obj_area_input = "obj_area" . $request->obj_city;
-        $request->area = $this->getAreaid($request->input($obj_area_input));
-        $result = $this->o_rep->addObject($request);
+        $area = $this->getAreaid($request->input($obj_area_input));
+        $result = $this->o_rep->addObject($request, $area);
         if(is_array($result) && !empty($result['error'])) {
             return back()->with($result);
         }
