@@ -408,6 +408,12 @@ class ObjectController extends AdminController
         ]);
     }
 
+    public function MassAction(Request $request){
+        $this->checkUser();
+        $objects = Object::whereIn($request->objects)->get();
+        dd($objects);
+    }
+
     public function createDistricts(){
        $objects = Object::select("*")->withTrashed()->get();
        foreach ($objects as $object) {

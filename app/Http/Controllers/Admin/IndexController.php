@@ -73,6 +73,7 @@ class IndexController extends AdminController {
             $object->client = json_decode($object->client);
         }
         $orders = array("created_at" => "По дате", "price" => "Дешевле", "pricedesc" => "Дороже");
+        $mass_actions = array("" => "Действие", "deleted" => "Удалить", "inwork" => "Взять в работу");
         $order_select = array();
         $selected = Url::current();
         foreach ($orders as $key => $value) {
@@ -98,7 +99,7 @@ class IndexController extends AdminController {
             $filter_data = $request->except("search");
         }
         $filter = view(config('settings.theme').'.admin.filter')->with(array("inputs" => $this->inputs, "cities" => $cities, "data" => $filter_data));
-        $this->content = view(config('settings.theme').'.admin.objects')->with(array("objects" => $objects, "menus" => $menus, "actions" => $actions, "order_select" => $order_select, "type" => $type, "filter" => $filter, "selected" => $selected, "user" => $this->user))->render();
+        $this->content = view(config('settings.theme').'.admin.objects')->with(array("objects" => $objects, "menus" => $menus, "actions" => $actions, "mass_actions" => $mass_actions,"order_select" => $order_select, "type" => $type, "filter" => $filter, "selected" => $selected, "user" => $this->user))->render();
         $this->title = 'Личный кабинет';
         return $this->renderOutput();
     }
@@ -270,7 +271,7 @@ class IndexController extends AdminController {
                 $who = $object->preworkingUser->name;
                 $acceptlink = route('object.accessPreWork',['object'=>$object->alias]);
                 $canсelllink = route('object.cancelPreWork',['object'=>$object->alias]);
-                $who_pre = "<p style='color: #BABABA'>От ".$who."</p>";
+                $who_pre = "<p style='color: #BABABA; margin:0 !important;'>От ".$who."</p>";
                 $accept = "<form action='$acceptlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Подтвердить'><i class=\"fa fa-check fa-lg\"></i></button></form>";
                 $canсell = "<form action='$canсelllink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Отклонить'><i class=\"fa fa-ban fa-lg\"></i></button></form>";
                 return $who_pre.$accept.$canсell;

@@ -386,6 +386,16 @@
             $(this).submit();
         });
 
+        $('#check-all').click(function() {
+            var c = this.checked;
+            $('.action-checkbox:checkbox').prop('checked',c);
+        });
+
+        $('form#mass_action').submit(function (e) {
+            e.preventDefault();
+            var checked =  $('.action-checkbox:checked').clone().hide();
+            $(this).append(checked);
+        });
 
         $('.js-show-phone').click(function (e) {
             var href = $(this).attr('href');
