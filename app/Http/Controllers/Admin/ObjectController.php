@@ -410,8 +410,22 @@ class ObjectController extends AdminController
 
     public function MassAction(Request $request){
         $this->checkUser();
-        $objects = Object::whereIn($request->objects)->get();
-        dd($objects);
+        $objects = Object::select("*")->whereIn("id", $request->objects)->get();
+        switch ($request->mass_actions) {
+            case "delete":
+                foreach ($objects as $object) {
+                    if($this->user->cant('softdelete', $object)) {
+                        return back()->with(array('error' => 'Доступ запрещен'));
+                    }
+                    $object->deletedUser()->associate($this->user);
+                    $object->update();
+                    $object->delete();
+                }
+                return back()->with(['status' => 'Объекты удалены']);
+                break;
+            default:
+                break;
+        }
     }
 
     public function createDistricts(){

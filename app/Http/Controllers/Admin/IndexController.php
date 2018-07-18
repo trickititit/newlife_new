@@ -73,7 +73,7 @@ class IndexController extends AdminController {
             $object->client = json_decode($object->client);
         }
         $orders = array("created_at" => "По дате", "price" => "Дешевле", "pricedesc" => "Дороже");
-        $mass_actions = array("" => "Действие", "deleted" => "Удалить", "inwork" => "Взять в работу");
+        $mass_actions = array("" => "Действие", "delete" => "Удалить", "inwork" => "Взять в работу");
         $order_select = array();
         $selected = Url::current();
         foreach ($orders as $key => $value) {

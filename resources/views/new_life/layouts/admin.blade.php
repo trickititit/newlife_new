@@ -379,6 +379,13 @@
   </div>
 </div>
 <script>
+
+    function massAction() {
+        var checked =  $('.action-checkbox:checked').clone().hide();
+        $('form#mass_action').append(checked);
+        return true;
+    }
+
     $(document).ready(function() {
         $('.btn-actions form:not(.favor)').submit(function (e) {
             var offset = $(window).scrollTop();
@@ -389,12 +396,6 @@
         $('#check-all').click(function() {
             var c = this.checked;
             $('.action-checkbox:checkbox').prop('checked',c);
-        });
-
-        $('form#mass_action').submit(function (e) {
-            e.preventDefault();
-            var checked =  $('.action-checkbox:checked').clone().hide();
-            $(this).append(checked);
         });
 
         $('.js-show-phone').click(function (e) {
