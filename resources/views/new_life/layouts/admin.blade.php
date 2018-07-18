@@ -379,7 +379,6 @@
   </div>
 </div>
 <script>
-
     function massAction() {
         var checked =  $('.action-checkbox:checked').clone().hide();
         $('form#mass_action').append(checked);

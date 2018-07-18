@@ -68,12 +68,12 @@ class IndexController extends AdminController {
         $objects = $this->o_rep->getScope($type, $request, false, $order, $this->settings["pagination"]);
         $objects->appends(request()->input());
         $actions = array();
+        $mass_actions = $this->getMassActions($type);
         foreach ($objects as $object) {
             $actions = array_add($actions,"object".$object->id, $this->getActions($object, $this->user, $type));
             $object->client = json_decode($object->client);
         }
         $orders = array("created_at" => "По дате", "price" => "Дешевле", "pricedesc" => "Дороже");
-        $mass_actions = array("" => "Действие", "delete" => "Удалить", "inwork" => "Взять в работу");
         $order_select = array();
         $selected = Url::current();
         foreach ($orders as $key => $value) {
@@ -287,12 +287,12 @@ class IndexController extends AdminController {
                 $who = $object->deletedUser->name;
                 $acceptlink = route('object.destroy',['object'=>$object->alias]);
                 $restorelink = route('object.restore',['object'=>$object->alias]);
-                $who_delete = "<p style='color: #BABABA'>От ".$who."</p>";
+                $who_delete = "<p style='color: #BABABA; margin:0 !important;'>От ".$who."</p>";
                 $accept = "<form action='$acceptlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить навсегда'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                 $restore = "<form action='$restorelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Восстановить'><i class=\"fa fa-reply fa-lg\"></i></button></form>";
                 return $who_delete.$accept.$restore;
             default:
-                if ($user->role != "user") {
+                if ($user->role->name != "user") {
                     $editlink = route('object.edit',['object'=>$object->alias]);
                     $worklink = route('object.prework',['object'=>$object->alias]);
                     if ($object->preworkingUser != null || $object->workingUser != null) {
@@ -301,11 +301,11 @@ class IndexController extends AdminController {
                         $inwork = "<form action='$worklink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Взять в работу'><i class=\"fa fa-gears fa-lg\"></i></button></form>";
                     }
                     $deletelink = route('object.softDelete',['object'=>$object->alias]);
-                    if($object->workingUser == null || $user->role == "admin")  {
+                    if($object->workingUser == null || $user->role->name == "admin")  {
                         $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                         $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
                     } else {
-                        if(($object->workingUser->id == $user->id) || $user->role == "admin") {
+                        if(($object->workingUser->id == $user->id) || $user->role->name == "admin") {
                             $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                             $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
                         } else {
@@ -327,6 +327,36 @@ class IndexController extends AdminController {
                 $favorites = "<form class='favor' action='$favoriteslink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><input type=\"hidden\" name=\"type\" value=\"$favor_type\"><button class='btn btn-secondary btn-sm btn-favor' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='В избранное'><i id='favor-".$object->id."' class=\"fa " . ($favor_ ? "fa-star" : "fa-star-o") . " fa-lg\"></i></button></form>";
                 return $edit.$inwork.$favorites.$delete;
         }
+    }
+
+    private function getMassActions($type) {
+        switch ($type) {
+            case "my":
+                $actions = ["" => "Действие", "delete" => "Удалить", "inprework" => "Взять в работу"];
+                break;
+            case "inwork":
+                $actions = ["" => "Действие", "delete" => "Удалить", "unwork" => "Убрать из работы", "out" => "Выгрузить"];
+                break;
+            case "prework":
+                $actions = ["" => "Действие", "accept_prework" => "Подтвердить", "cancel_prework" => "Отклонить"];
+                break;
+            case "completed":
+                $actions = ["" => "Действие", "activate" => "Активировать", "delete" => "Удалить"];
+                break;
+            case "outed":
+                $actions = ["" => "Действие", "delete" => "Удалить", "unwork" => "Убрать из работы", "unout" => "Убрать с выгрузки"];
+                break;
+            case "myouted":
+                $actions = ["" => "Действие", "delete" => "Удалить", "unwork" => "Убрать из работы", "unout" => "Убрать с выгрузки"];
+                break;
+            case "deleted":
+                $actions = ["" => "Действие", "destroy" => "Удалить на всегда", "recover" => "Восстановить"];
+                break;
+            default:
+                $actions = ["" => "Действие", "delete" => "Удалить", "inprework" => "Взять в работу"];
+                break;
+        }
+        return $actions;
     }
 
     private function checkFavorite($object) {

@@ -130,7 +130,7 @@ class FavoriteController extends AdminController
                 $restore = "<form action='$restorelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Восстановить'><i class=\"fa fa-reply fa-lg\"></i></button></form>";
                 return $who_delete.$accept.$restore;
             default:
-                if ($user->role != "user") {
+                if ($user->role->name != "user") {
                     $editlink = route('object.edit',['object'=>$object->alias]);
                     $worklink = route('object.prework',['object'=>$object->alias]);
                     if ($object->preworkingUser != null || $object->workingUser != null) {
@@ -139,11 +139,11 @@ class FavoriteController extends AdminController
                         $inwork = "<form action='$worklink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Взять в работу'><i class=\"fa fa-gears fa-lg\"></i></button></form>";
                     }
                     $deletelink = route('object.softDelete',['object'=>$object->alias]);
-                    if($object->workingUser == null || $user->role == "admin")  {
+                    if($object->workingUser == null || $user->role->name == "admin")  {
                         $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                         $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
                     } else {
-                        if(($object->workingUser->id == $user->id) || $user->role == "admin") {
+                        if(($object->workingUser->id == $user->id) || $user->role->name == "admin") {
                             $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                             $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
                         } else {

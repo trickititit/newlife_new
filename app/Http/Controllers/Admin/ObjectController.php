@@ -271,9 +271,9 @@ class ObjectController extends AdminController
         $this->checkUser();
         $object->preworkingUser()->dissociate();
         if ($object->update()) {
-            return back()->with(['status' => 'Объект принят в работу', 'offset' => $request->offset]);
+            return back()->with(['status' => 'Объект отклонен', 'offset' => $request->offset]);
         } else {
-            return back()->with(['error' => 'Ошибка принятия в работу', 'offset' => $request->offset]);
+            return back()->with(['error' => 'Ошибка отклонения', 'offset' => $request->offset]);
         }
     }
 
@@ -410,20 +410,127 @@ class ObjectController extends AdminController
 
     public function MassAction(Request $request){
         $this->checkUser();
-        $objects = Object::select("*")->whereIn("id", $request->objects)->get();
+        $objects = Object::select("*")->whereIn("id", $request->objects)->withTrashed()->get();
         switch ($request->mass_actions) {
             case "delete":
                 foreach ($objects as $object) {
-                    if($this->user->cant('softdelete', $object)) {
-                        return back()->with(array('error' => 'Доступ запрещен'));
+                    if ($object->workingUser == null || $this->user->role->name == "admin" || $object->workingUser->id == $this->user->id) {
+                        if($this->user->cant('softdelete', $object)) {
+                            return back()->with(array('error' => 'Доступ запрещен'));
+                        }
+                        $object->deletedUser()->associate($this->user);
+                        $object->update();
+                        $object->delete();
                     }
-                    $object->deletedUser()->associate($this->user);
-                    $object->update();
-                    $object->delete();
                 }
                 return back()->with(['status' => 'Объекты удалены']);
                 break;
+            case "inprework":
+                foreach ($objects as $object) {
+                    if ($object->preworkingUser == null && $object->workingUser == null) {
+                        $object->preworkingUser()->associate($this->user);
+                        $object->update();
+                    }
+                }
+                return back()->with(['status' => 'Объекты поданы в работу']);
+                break;
+            case "accept_prework":
+                if($this->user->role->name != "admin") {
+                    return back()->with(['error' => 'Доступ запрещен']);
+                }
+                foreach ($objects as $object) {
+                    $user = $object->preworkingUser;
+                    $object->worked_at = Carbon::now();
+                    $object->workingUser()->associate($user);
+                    $object->preworkingUser()->dissociate();
+                    $object->update();
+                }
+                return back()->with(['status' => 'Объекты подтверждены']);
+                break;
+            case "cancel_prework":
+                if($this->user->role->name != "admin") {
+                    return back()->with(['error' => 'Доступ запрещен']);
+                }
+                foreach ($objects as $object) {
+                    $object->preworkingUser()->dissociate();
+                    $object->update();
+                }
+                return back()->with(['status' => 'Объекты отклонены']);
+                break;
+            case "activate":
+                foreach ($objects as $object) {
+                        if($object->completedUser()->id == $this->user->id || $this->user->role->name == "admin") {
+                            $object->activate_at = Carbon::now();
+                            $object->completedUser()->dissociate();
+                            $state = $object->activate_state;
+                            if ($state != null) {
+                                $object->activate_state = ++$state;
+                            } else {
+                                $object->activate_state = 1;
+                            }
+                            $object->update();
+                        }
+                    }
+                    return back()->with(['status' => 'Объекты активированы']);
+                break;
+            case "out":
+                foreach ($objects as $object) {
+                    if($object->workingUser()->id == $this->user->id || $this->user->role->name == "admin") {
+                        $object->outed_at = Carbon::now();
+                        $object->out = 1;
+                        $object->update();
+                    }
+                }
+                $objects_ = Object::Outed()->get();
+                $this->ObjectsToXml($objects_);
+                return back()->with(['status' => 'Объекты добавлены на выгрузку']);
+                break;
+            case "unwork":
+                foreach ($objects as $object) {
+                    if(($object->workingUser()->id == $this->user->id) || $this->user->role->name == "admin") {
+                        $object->workingUser()->dissociate();
+                        $object->update();
+                    }
+                }
+                return back()->with(['status' => 'Объекты убраны из работы']);
+                break;
+            case "unout":
+                foreach ($objects as $object) {
+                    if($this->user->role->name == "admin") {
+                        $object->outed_at = null;
+                        $object->out = 0;
+                        $object->update();
+                    }
+                }
+                $objects_ = Object::Outed()->get();
+                $this->ObjectsToXml($objects_);
+                    return back()->with(['status' => 'Объекты удалены из выгрузки']);
+                break;
+            case "destroy":
+                if($this->user->role->name != "admin") {
+                    return back()->with(['error' => 'Доступ запрещен']);
+                }
+                foreach ($objects as $object) {
+                    if($this->user->cant('delete', $object)) {
+                        return back()->with(array('error' => 'Доступ запрещен'));
+                    }
+                    $object->forceDelete();
+                }
+                    return back()->with(['status' => 'Объекты удалены']);
+                break;
+            case "recover":
+                if($this->user->role->name != "admin") {
+                    return back()->with(['error' => 'Доступ запрещен']);
+                }
+                foreach ($objects as $object) {
+                    $object->deletedUser()->dissociate();
+                    $object->update();
+                    $object->restore();
+                }
+                return back()->with(['status' => 'Объекты восстановлены']);
+                break;
             default:
+                return back();
                 break;
         }
     }

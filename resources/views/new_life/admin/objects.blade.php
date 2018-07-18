@@ -9,7 +9,7 @@
         <header class="box-typical-header">
             <div class="tbl-row">
                 <div class="tbl-cell tbl-cell-title" style="padding: 0 !important;">
-                    {!! Form::open(["url" => route('object.mass.action'), 'method' => "POST", "id" => "mass_action", "class" => "clearfix", "style" => "float: left;margin: 5px;"]) !!}
+                    {!! Form::open(["url" => route('object.mass.action'), 'method' => "POST", "id" => "mass_action", "class" => "clearfix", "style" => "float: left;margin: 5px;", "onsubmit" => "massAction()"]) !!}
                     <div class="input-group">
                     {!! Form::select('mass_actions', $mass_actions, "",  ["class" => "form-control form-control-sm"]) !!}
                         <span class="input-group-btn">
