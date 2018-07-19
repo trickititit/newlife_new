@@ -3704,7 +3704,7 @@ function after_clicked( page, job ) {
                 return document.querySelector('.user-address-text').innerText;
             });
             job.phone = page.evaluate(function () {
-                return document.querySelector('.action-show-number .amw-test-item-click').innerText;
+                return document.querySelector( \"a.action-show-number\" ).innerText; 
             });
             job.price = page.evaluate(function () {
                 return document.querySelector('.price-value').innerText;
@@ -3745,7 +3745,7 @@ function checkClick (page) {
         return;
         } else {
             var result =  page.evaluate(function() {
-                var txt = document.querySelector( \"a.action-show-number .amw-test-item-click\" ).innerText;
+                var txt = document.querySelector( \"a.action-show-number .amw-test-item-click\" ).innerText;               
                 if (!txt.indexOf('XX-XX') + 1) {
                     return true;
                 } else {

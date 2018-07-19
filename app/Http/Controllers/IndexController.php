@@ -70,9 +70,9 @@ class IndexController extends SiteController
     }
 
     public function curlAvitoK(JavaScriptMaker $jsmaker) {
-        if (request()->ip() != "193.124.189.57"){
-            abort(404);
-        }
+//        if (request()->ip() != "193.124.189.57"){
+//            abort(404);
+//        }
         $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/kvartiry/prodam/vtorichka?user=1";
         $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
         $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");

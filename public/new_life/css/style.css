@@ -181,7 +181,12 @@
   left: 0; }
 
 .table-obj {
-  max-width: 85px!important;
+  max-width: 100px!important;
+  text-align: center;
+}
+
+.table-obj-a {
+  width: 120px!important;
   text-align: center;
 }
 
@@ -189,12 +194,23 @@
   max-width: 120px!important;
 }
 
+.table-contact-a {
+  width: 130px!important;
+  text-align: center;
+}
+
+
 .table-actions {
   max-width: 105px!important;
 }
 
 .table-address {
-  max-width: 100px!important;
+  max-width: 140px!important;
+  text-align: center;
+}
+
+.table-address-a {
+  width: 140px!important;
   text-align: center;
 }
 

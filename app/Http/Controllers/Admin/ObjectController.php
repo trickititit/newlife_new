@@ -298,7 +298,6 @@ class ObjectController extends AdminController
                 $object->activate_state = 0;
             }
             if($object->created_at->addMonths(1 + $object->activate_state) < Carbon::now()) {
-                dump($object->created_at->addMonths(1 + $object->activate_state));
                 $object->activate_state++;
                 $user = $object->created_id;
                 $object->completedUser()->associate($user);
@@ -459,7 +458,7 @@ class ObjectController extends AdminController
                 break;
             case "activate":
                 foreach ($objects as $object) {
-                        if($object->completedUser()->id == $this->user->id || $this->user->role->name == "admin") {
+                        if($object->completedUser->id == $this->user->id || $this->user->role->name == "admin") {
                             $object->activate_at = Carbon::now();
                             $object->completedUser()->dissociate();
                             $state = $object->activate_state;
@@ -475,7 +474,7 @@ class ObjectController extends AdminController
                 break;
             case "out":
                 foreach ($objects as $object) {
-                    if($object->workingUser()->id == $this->user->id || $this->user->role->name == "admin") {
+                    if($object->workingUser->id == $this->user->id || $this->user->role->name == "admin") {
                         $object->outed_at = Carbon::now();
                         $object->out = 1;
                         $object->update();
@@ -487,7 +486,7 @@ class ObjectController extends AdminController
                 break;
             case "unwork":
                 foreach ($objects as $object) {
-                    if(($object->workingUser()->id == $this->user->id) || $this->user->role->name == "admin") {
+                    if(($object->workingUser->id == $this->user->id) || $this->user->role->name == "admin") {
                         $object->workingUser()->dissociate();
                         $object->update();
                     }
@@ -533,6 +532,10 @@ class ObjectController extends AdminController
                 return back();
                 break;
         }
+    }
+
+    public function allCompleted(){
+        $this->checkUser();
     }
 
     public function createDistricts(){

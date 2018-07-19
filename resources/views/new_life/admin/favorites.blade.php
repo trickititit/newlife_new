@@ -75,35 +75,35 @@
                 </table>
             </div><!--.tab-pane-->
             <div role="tabpanel" class="tab-pane fade" id="tabs-2-tab-2" aria-expanded="false">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                        <tr>
-                            <th width="30">Обьект</th>
-                            <th width="40">Адрес</th>
-                            <th width="10">Цена</th>
-                            <th >Описание</th>
-                            <th width="100">Контакты</th>
-                            <th width="80">Действия</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                <table class="table table-striped table-bordered table-hover table-sm table-responsive">
+                    <thead>
+                    <tr>
+                        <th >Обьект</th>
+                        <th >Адрес</th>
+                        <th >Цена</th>
+                        <th >Описание</th>
+                        <th >Контакты</th>
+                        <th >Действия</th>
+                    </tr>
+                    </thead>
+                    <tbody>
                         @if($a_favorites)
                             @foreach($a_favorites as $object)
                                 <tr>
-                                    <td>
-                                        @if($object->category == 1)
-                                            <a href="{{$object->link}}" target="_blank">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
-                                        @elseif($object->category == 2)
-                                            <a href="{{$object->link}}" target="_blank">{{$object->type}}</a><br>{{$object->home_square}} м² на участке {{$object->earth_square}}<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
-                                        @elseif($object->category == 3)
-                                            <a href="{{$object->link}}" target="_blank">Комната в {{$object->rooms}}-к</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
-                                        @endif
+                                    <td class="table-obj-a"><div class="tab_content">
+                                            @if($object->category == 1)
+                                                <a href="{{$object->link}}" target="_blank">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
+                                            @elseif($object->category == 2)
+                                                <a href="{{$object->link}}" target="_blank">{{$object->type}}</a><br>{{$object->home_square}} м² на участке {{$object->earth_square}}<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
+                                            @elseif($object->category == 3)
+                                                <a href="{{$object->link}}" target="_blank">Комната в {{$object->rooms}}-к</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
+                                            @endif
+                                        </div>
                                     </td>
-                                    <td>{{ $object->city }},<br>{{ $object->address }},<br>{{ $object->area }}</td>
-                                    <td>{{ number_format($object->price) }}</td>
-                                    <td>{{ $object->desc }}</td>
-                                    <td>{{$object->client_contacts}} - {{ $object->client_name }}</td>
+                                    <td class="table-address-a"><div class="tab_content">{{ $object->city }},<br>{{ $object->address }},<br>{{ $object->area }}</div></td>
+                                    <td><div class="tab_content">{{ number_format($object->price) }}</div></td>
+                                    <td class="table-desc" style="max-width: 100% !important;"><div class="tab_content">{{ $object->desc }}</div></td>
+                                    <td class="table-contact-a"><div class="tab_content">{{$object->client_contacts}} - {{ $object->client_name }}</div></td>
                                     <td width="100"><div class="btn-actions centovka">
                                             {!! $actions["object".$object->id] !!}
                                         </div>
@@ -113,7 +113,6 @@
                         @endif
                         </tbody>
                     </table>
-                </div>
             </div><!--.tab-pane-->
         </div><!--.tab-content-->
     </section>
