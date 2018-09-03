@@ -3587,7 +3587,7 @@ useragent.push('Opera/12.02 (Android 4.1; Linux; Opera Mobi/ADR-1111101157; U; e
 //Здесь находится страничка, которую нужно спарсить
 var parseUrl = '".$request[1]."';
 var title = '".$request[0]."';
-var job = {title: title, url: parseUrl, phone: \"\", address: \"\", city: \"\", price: \"\", category: \"\", title_obj: \"\", contact_name: \"\", desc : \"\", person_name : \"\", id : \"\", date: \"\"};                               
+var job = {title: title, url: parseUrl, phone: \"\", address: \"\", city: \"\", price: \"\", category: \"\", title_obj: \"\", contact_name: \"\", desc : \"\", person_name : \"\", id : \"\", date: \"\", material_h: \"\", material_k: \"\", material_c: \"\", floor_in: \"\", distance: \"\", deal: \"\", geo: \"none\"};                               
 var jobs_list = [];
 var debug = false;
 var click_count = 0;
@@ -3655,28 +3655,26 @@ function after_clicked( page, job ) {
            arr_debug.push((new Date().getTime() - arr_debug[0]) + \" late ms. this after\");  
         }
             job.title_obj = page.evaluate(function() {
-                return [].map.call(document.querySelectorAll('.semantic-text'), function (span) {
-                    return span.innerText;
-                });
+                return document.querySelector('[data-marker=\"item-description/title\"]').innerText;
             });
             job.desc = page.evaluate(function() {
-                return document.querySelector('.description-preview-wrapper').innerText;
+                return document.querySelector('._3eWgi').innerText;
             });
             job.id = page.evaluate(function() {
-                return document.querySelector('.item-id').innerText;
+                return document.querySelector('[data-marker=\"item-stats/timestamp\"]').innerText;
             });
-            job.geo = page.evaluate(function() {
-                var div_geo = document.querySelector('#item-map');
-                if (div_geo !== null) {
-                    var attr_1 = div_geo.getAttribute('data-coords-lat');
-                    var attr_2 = div_geo.getAttribute('data-coords-lng');
-                    return attr_1 + \",\" + attr_2;
-                } else {
-                    return \"none\";
-                }
-            });
+//            job.geo = page.evaluate(function() {
+//                var div_geo = document.querySelector('#item-map');
+//                if (div_geo !== null) {
+//                    var attr_1 = div_geo.getAttribute('data-coords-lat');
+//                    var attr_2 = div_geo.getAttribute('data-coords-lng');
+//                    return attr_1 + \",\" + attr_2;
+//                } else {
+//                    return \"none\";
+//                }
+//            });
             job.contact_name = page.evaluate(function() {
-                var name = document.querySelector('.person-contact-name');
+                var name = document.querySelector('[data-marker=\"seller-info/name\"]');
                 if (name !== null) {
                     return name.innerText;
                 } else {
@@ -3684,7 +3682,7 @@ function after_clicked( page, job ) {
                 }
             });
             job.person_name = page.evaluate(function() {
-                var name = document.querySelector('.person-name');
+                var name = document.querySelector('[data-marker=\"seller-info/name\"]');
                 if (name !== null) {
                     return name.innerText;
                 } else {
@@ -3692,22 +3690,37 @@ function after_clicked( page, job ) {
                 }
             });
             job.date = page.evaluate(function() {
-                return document.querySelector('.item-add-date').innerText;
-            });
-            job.city = page.evaluate(function() {
-                return document.querySelector('.avito-address-text').innerText;
+                return document.querySelector('[data-marker=\"item-stats/timestamp\"] span').innerText;
             });
             job.category = page.evaluate(function() {
-                return document.querySelector('.param-last').innerText;
+                return document.querySelector('[data-marker=\"item-properties-item(0)/description\"]').innerText;
             });
             job.address = page.evaluate(function() {
-                return document.querySelector('.user-address-text').innerText;
+                return document.querySelector('[data-marker=\"delivery/location\"]').innerText;
             });
             job.phone = page.evaluate(function () {
-                return document.querySelector( \"a.action-show-number\" ).innerText; 
+                return document.querySelector( '[data-marker=\"item-contact-bar/call\"]' ).getAttribute('href'); 
             });
             job.price = page.evaluate(function () {
-                return document.querySelector('.price-value').innerText;
+                return document.querySelector('[data-marker=\"item-description/price\"]').innerText;
+            });
+            job.material_h = page.evaluate(function () {
+                return document.querySelector('[data-marker=\"item-properties-item(6)/description\"]').innerText;
+            });
+            job.material_c = page.evaluate(function () {
+                return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
+            });
+            job.material_k = page.evaluate(function () {
+                return document.querySelector('[data-marker=\"item-properties-item(4)/description\"]').innerText;
+            });
+            job.floor_in = page.evaluate(function () {
+                return document.querySelector('[data-marker=\"item-properties-item(5)/description\"]').innerText;
+            });
+            job.distance = page.evaluate(function () {
+                return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
+            });
+            job.deal = page.evaluate(function () {
+                return document.querySelector('[data-marker=\"item-properties-item(1)/description\"]').innerText;
             });
             console.log(JSON.stringify(job));
             if (debug) {
@@ -3727,7 +3740,7 @@ function checkClick (page) {
             var clicked = page.evaluate(
         function ( mouseclick_fn ) {
             // want the div with class \"submenu\"
-            var element = document.querySelector( \"a.action-show-number\" );
+            var element = document.querySelector( \"[data-marker = item-contact-bar/call]\" );
             if ( ! element ) {
                 return false;
             }
@@ -3745,7 +3758,7 @@ function checkClick (page) {
         return;
         } else {
             var result =  page.evaluate(function() {
-                var txt = document.querySelector( \"a.action-show-number .amw-test-item-click\" ).innerText;               
+                var txt = document.querySelector( \"a.action-show-number .js-phone-number\" ).innerText;               
                 if (!txt.indexOf('XX-XX') + 1) {
                     return true;
                 } else {
@@ -3780,7 +3793,7 @@ function next_page(page, job) {
             if (status !== 'success') {
                 console.log('Unable to access network');
             } else {
-               click_div( page, job );
+               after_clicked( page, job );
             }
         });
 }

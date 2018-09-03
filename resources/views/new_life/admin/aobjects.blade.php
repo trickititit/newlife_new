@@ -28,11 +28,11 @@
                         <tr>
                             <td class="table-obj-a"><div class="tab_content">
                                 @if($object->category == 1)
-                                    <a href="{{$object->link}}" target="_blank">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
+                                    <a href="{{$object->link}}" target="_blank">{{$object->rooms}}-к квартира</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('d-m-Y'): "" }}
                                 @elseif($object->category == 2)
-                                    <a href="{{$object->link}}" target="_blank">{{$object->type}}</a><br>{{$object->home_square}} м² на участке {{$object->earth_square}}<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
+                                    <a href="{{$object->link}}" target="_blank">{{$object->type}}</a><br>{{$object->home_square}} м² на участке {{$object->earth_square}}<br>{{ ($object->date != null)? $object->date->format('d-m-Y'): "" }}
                                 @elseif($object->category == 3)
-                                    <a href="{{$object->link}}" target="_blank">Комната в {{$object->rooms}}-к</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('m-d-Y H:i'): "" }}
+                                    <a href="{{$object->link}}" target="_blank">Комната в {{$object->rooms}}-к</a><br>{{$object->square}} м² {{$object->floor}}/{{$object->build_floors}} эт.<br>{{ ($object->date != null)? $object->date->format('d-m-Y'): "" }}
                                 @endif
                                 </div>
                             </td>
