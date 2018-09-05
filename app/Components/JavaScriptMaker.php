@@ -3714,10 +3714,10 @@ function after_clicked( page, job ) {
                 return document.querySelector('[data-marker=\"item-properties-item(4)/description\"]').innerText;
             });
             job.floor_in = page.evaluate(function () {
-                return document.querySelector('[data-marker=\"item-properties-item(5)/description\"]').innerText;
+                return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
             });
             job.distance = page.evaluate(function () {
-                return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
+                return document.querySelector('[data-marker=\"item-properties-item(5)/description\"]').innerText;
             });
             job.deal = page.evaluate(function () {
                 return document.querySelector('[data-marker=\"item-properties-item(1)/description\"]').innerText;

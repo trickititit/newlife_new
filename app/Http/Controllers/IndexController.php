@@ -65,7 +65,6 @@ class IndexController extends SiteController
         $jsmaker->setJs("parse-avito", $request->parse_url, true, "", $this->randStr);
         $cmd = "phantomjs ".base_path("phantomjs/bin/avito.js");
         exec($cmd, $output);
-        dump($output);
         $this->objectAvitoToBase($output, $jsmaker);
     }
 
@@ -92,9 +91,9 @@ class IndexController extends SiteController
     }
 
     public function curlAvitoH(JavaScriptMaker $jsmaker) {
-        if (request()->ip() != "193.124.189.57"){
-            abort(404);
-        }
+//        if (request()->ip() != "193.124.189.57"){
+//            abort(404);
+//        }
         $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/doma_dachi_kottedzhi/prodam?user=1";
         $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
         $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
@@ -185,17 +184,18 @@ class IndexController extends SiteController
             }
             $object->date = $this->parseDate($object->date);
             $object->phone = $this->getAllInt($object->phone);
-//            $object->title_obj = explode(" ", $object->title_obj);
+            $title_obj = explode(" ", $object->title_obj);
             switch ($object->category) {
                 case '1':
-                    if ($object->title_obj[1] == "вновостройке") {
-                        $object->type = "Новостройка";
+                    if ($title_obj[0] == "Студия,") {
+//                        $object->type = "Новостройка";
+                        $object->type = "Вторичка";
                         $type = 1;
                     } else {
                         $object->type = "Вторичка";
                         $type = 0;
                     }
-                    $object->title_obj = $this->checkArray($object->title_obj, $type);
+//                    $object->title_obj = $this->checkArray($object->title_obj, $type);
                     $object->rooms = $this->findParamOnString($object->title_obj, $object->category, "room", $type);
                     $object->square = $this->findParamOnString($object->title_obj, $object->category, "square", $type);
                     $object->floor = $this->findParamOnString($object->title_obj, $object->category, "floor", $type);
@@ -207,7 +207,11 @@ class IndexController extends SiteController
                     $object->url = "http://avito.ru".$object->url;
                     $object->area = $this->findParamOnString($object->address, $object->category, "area", $type);
                     $object->city = $this->findParamOnString($object->address, $object->category, "city", $type);
-                    dd($object);
+                    $address = explode(",", $object->address);
+                    $object->address = '';
+                    for ($i = 2; $i < count($address); $i++) {
+                        $object->address  .= trim($address[$i]) . " ";
+                    }
                     $result_ = $this->aobj_rep->addObj($object);
                     if ($result_ == "one") {
                         $result["have"]++;
@@ -221,6 +225,9 @@ class IndexController extends SiteController
                     }
                     break;
                 case '2':
+                    if($object->distance == "В черте города") {
+                        $object->distance = 0;
+                    }
                     $object->type = $this->findParamOnString($object->title_obj, $object->category, "type");
 //                    $object->distance = $object->distance;
                     $object->home_square = $this->findParamOnString($object->title_obj, $object->category, "home_square");
@@ -233,7 +240,11 @@ class IndexController extends SiteController
                     $object->url = "http://avito.ru".$object->url;
                     $object->area = $this->findParamOnString($object->address, $object->category, "area");
                     $object->city = $this->findParamOnString($object->address, $object->category, "city");
-                    dd($object);
+                    $address = explode(",", $object->address);
+                    $object->address = '';
+                    for ($i = 2; $i < count($address); $i++) {
+                        $object->address  .= trim($address[$i]) . " ";
+                    }
                     $result_ = $this->aobj_rep->addObj($object);
                     if ($result_ == "one") {
                         $result["have"]++;
@@ -259,6 +270,11 @@ class IndexController extends SiteController
                     $object->url = "http://avito.ru".$object->url;
                     $object->area = $this->findParamOnString($object->address, $object->category, "area");
                     $object->city = $this->findParamOnString($object->address, $object->category, "city");
+                    $address = explode(",", $object->address);
+                    $object->address = '';
+                    for ($i = 2; $i < count($address); $i++) {
+                        $object->address  .= trim($address[$i]) . " ";
+                    }
                     $result_ = $this->aobj_rep->addObj($object);
                     if ($result_ == "one") {
                         $result["have"]++;
@@ -304,24 +320,36 @@ class IndexController extends SiteController
                         }
                         $room = explode(" ", $string);
                         for($i = 1; $i < 11; $i++) {
-                            if ($room[0] == "$i-к,") {
+                            if ($room[0] == "$i-к") {
                                 return $i;
                             }
                         }
                         break;
                     case 'square':
                         $square = explode(" ", $string);
-                        return (int)$square[0];
+                        if ($type == 1) {
+                            return (int)$square[1];
+                        } else {
+                            return (int)$square[2];
+                        }
                         # code...
                         break;
                     case 'floor':
                         $floor_ = explode(" ", $string);
-                        $floor = explode("/", $floor_[4]);
+                        if ($type == 1) {
+                            $floor = explode("/", $floor_[3]);
+                        } else {
+                            $floor = explode("/", $floor_[4]);
+                        }
                         return (int) $floor[0];
                         break;
                     case 'build_floors':
                         $floor_ = explode(" ", $string);
-                        $floor = explode("/", $floor_[4]);
+                        if ($type == 1) {
+                            $floor = explode("/", $floor_[3]);
+                        } else {
+                            $floor = explode("/", $floor_[4]);
+                        }
                         return (int) $floor[1];
                         # code...
                         break;
@@ -339,11 +367,11 @@ class IndexController extends SiteController
                         break;
                     case "city":
                         $city = explode(",", $string);
-                        return trim($city[1]);
+                        return trim($city[0]);
                         break;
                     case "area":
                         $area = explode(",", $string);
-                        return isset($area[2]) ? trim($area[2]) : "";
+                        return isset($area[1]) ? trim($area[1]) : "";
                         break;
                     case 'price':
                         return $this->getAllInt($string);
@@ -360,8 +388,8 @@ class IndexController extends SiteController
                         return $this->getAllInt($string);
                         break;
                     case 'type':
-                        for ($i = 0; $i < count($search_types); $i++) {
-                            if (preg_match("~".$search_types[$i]."~", $string[1])) {
+                        for ($i = 0; $i < count($types); $i++) {
+                            if (preg_match("~".$types[$i]."~", $string)) {
                                 return $types[$i];
                             }
                         }
@@ -372,7 +400,8 @@ class IndexController extends SiteController
                         }
                         break;
                     case 'earth_square':
-                        return $this->getAllInt($string);
+                        $sq = explode(" ", $string);
+                        return (int)$sq[5];
                         break;
                     case 'build_floors':
                         for ($i = 1; $i < 11; $i++) {
