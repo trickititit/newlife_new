@@ -16,6 +16,7 @@ use Menu;
 use Gate;
 use URL;
 use Route;
+use Storage;
 
 class IndexController extends AdminController {
 
@@ -47,7 +48,7 @@ class IndexController extends AdminController {
         $this->inputs = array_add($this->inputs, "obj_room", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5", "6" => "6", "7" => "7", "8" => "8", "9" => "9", "10" => "9+"));
         $this->inputs = array_add($this->inputs, "obj_home_floors_2", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5+"));
         $this->inputs = array_add($this->inputs, "obj_build_type_1", array("Кирпичный" => "Кирпичный", "Панельный" => "Панельный", "Блочный" => "Блочный", "Монолитный" => "Монолитный", "Деревянный" => "Деревянный"));
-        $this->inputs = array_add($this->inputs, "obj_build_type_2", array("Кирпич" => "Кирпич", "Брус" => "Брус", "Бревно" => "Бревно", "Металл" => "Металл", "Пеноблоки" => "Пеноблоки", "Сендвич-панели" => "Сендвич-панели", "Ж/б панели" => "Ж/б панели", "Экспериментальные материалы" => "Экспериментальные материалы"));
+        $this->inputs = array_add($this->inputs, "obj_build_type_2", array("Кирпич" => "Кирпич", "Брус" => "Брус", "Бревно" => "Бревно", "Металл" => "Металл", "Пеноблоки" => "Пеноблоки", "Сэндвич-панели" => "Сэндвич-панели", "Ж/б панели" => "Ж/б панели", "Экспериментальные материалы" => "Экспериментальные материалы"));
         $this->inputs = array_add($this->inputs, "obj_floor", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5", "6" => "6", "7" => "7", "8" => "8", "9" => "9", "10" => "10", "11" => "11", "12" => "12", "13" => "13", "14" => "14", "15" => "15", "16" => "16", "17" => "17", "18" => "18", "19" => "19", "20" => "20"));
         $this->inputs = array_add($this->inputs, "obj_distance", array("0" => "В черте города", "10" => "10 км", "20" => "20 км", "30" => "30 км", "50" => "50 км", "70" => "70+ км"));
         $this->inputs = array_add($this->inputs, "obj_home_floors_1", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5", "6" => "6", "7" => "7", "8" => "8", "9" => "9", "10" => "10", "11" => "11", "12" => "12", "13" => "13", "14" => "14", "15" => "15", "16" => "16", "17" => "17", "18" => "18", "19" => "19", "20" => "20"));
@@ -55,6 +56,7 @@ class IndexController extends AdminController {
 
     public function index(JavaScriptMaker $jsmaker, Request $request, $type = 'default', $order = ["created_at", "desc"]) {
         $this->checkUser();
+
 //        if (Gate::check('isAdmin', $this->user)) {
 //            abort(403);
 //        }
@@ -268,13 +270,22 @@ class IndexController extends AdminController {
                 $out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
                 return $edit.$uninwork.$out.$delete;
             case "prework":
-                $who = $object->preworkingUser->name;
-                $acceptlink = route('object.accessPreWork',['object'=>$object->alias]);
-                $canсelllink = route('object.cancelPreWork',['object'=>$object->alias]);
-                $who_pre = "<p style='color: #BABABA; margin:0 !important;'>От ".$who."</p>";
-                $accept = "<form action='$acceptlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Подтвердить'><i class=\"fa fa-check fa-lg\"></i></button></form>";
-                $canсell = "<form action='$canсelllink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Отклонить'><i class=\"fa fa-ban fa-lg\"></i></button></form>";
-                return $who_pre.$accept.$canсell;
+                $editlink = route('object.edit',['object'=>$object->alias]);
+                $unworklink = route('object.unwork',['object'=>$object->alias]);
+                $outlink = route('object.out',['object'=>$object->alias]);
+                $uninwork = "<form action='$unworklink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Убрать из работы'><i class=\"fa fa-gear fa-lg\"></i></button></form>";
+                $deletelink = route('object.softDelete',['object'=>$object->alias]);
+                $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
+                $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
+                $out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
+                return $edit.$uninwork.$out.$delete;
+//                $who = $object->preworkingUser->name;
+//                $acceptlink = route('object.accessPreWork',['object'=>$object->alias]);
+//                $canсelllink = route('object.cancelPreWork',['object'=>$object->alias]);
+//                $who_pre = "<p style='color: #BABABA; margin:0 !important;'>От ".$who."</p>";
+//                $accept = "<form action='$acceptlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Подтвердить'><i class=\"fa fa-check fa-lg\"></i></button></form>";
+//                $canсell = "<form action='$canсelllink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Отклонить'><i class=\"fa fa-ban fa-lg\"></i></button></form>";
+//                return $who_pre.$accept.$canсell;
             case "completed":
                 $editlink = route('object.edit',['object'=>$object->alias]);
                 $acceptlink = route('object.activate',['object'=>$object->alias]);
@@ -332,13 +343,14 @@ class IndexController extends AdminController {
     private function getMassActions($type) {
         switch ($type) {
             case "my":
-                $actions = ["" => "Действие", "delete" => "Удалить", "inprework" => "Взять в работу"];
+                $actions = ["" => "Действие", "delete" => "Удалить", "inwork" => "Взять в работу"];
                 break;
             case "inwork":
                 $actions = ["" => "Действие", "delete" => "Удалить", "unwork" => "Убрать из работы", "out" => "Выгрузить"];
                 break;
             case "prework":
-                $actions = ["" => "Действие", "accept_prework" => "Подтвердить", "cancel_prework" => "Отклонить"];
+//                $actions = ["" => "Действие", "accept_prework" => "Подтвердить", "cancel_prework" => "Отклонить"];
+                $actions = ["" => "Действие", "delete" => "Удалить", "unwork" => "Убрать из работы", "out" => "Выгрузить"];
                 break;
             case "completed":
                 $actions = ["" => "Действие", "activate" => "Активировать", "delete" => "Удалить"];
@@ -353,7 +365,7 @@ class IndexController extends AdminController {
                 $actions = ["" => "Действие", "destroy" => "Удалить на всегда", "recover" => "Восстановить"];
                 break;
             default:
-                $actions = ["" => "Действие", "delete" => "Удалить", "inprework" => "Взять в работу"];
+                $actions = ["" => "Действие", "delete" => "Удалить", "inwork" => "Взять в работу"];
                 break;
         }
         return $actions;

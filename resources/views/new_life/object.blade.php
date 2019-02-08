@@ -38,17 +38,25 @@
     <div class="col-md-3">
         <div class="block_content" style="width: 100%;">
             <div class="rietor-avatar">
-                @if(isset($object->createdUser->image))
-                    <img class="center img-circle" src="{{ asset(config('settings.theme')) }}/uploads/avatar/avatar-{{$object->createdUser->id}}-128{{$object->createdUser->image}}">
+                @if($object->working_id)
+                    @if(isset($object->workingUser->image))
+                        <img class="center img-circle" src="{{ asset(config('settings.theme')) }}/uploads/avatar/avatar-{{$object->workingUser->id}}-128{{$object->workingUser->image}}">
+                    @else
+                        <img class="center" src="{{ asset(config('settings.theme')) }}/img/avatar-1-128.png">
+                    @endif
                 @else
-                    <img class="center" src="{{ asset(config('settings.theme')) }}/img/avatar-1-128.png">
+                    @if(isset($object->createdUser->image))
+                        <img class="center img-circle" src="{{ asset(config('settings.theme')) }}/uploads/avatar/avatar-{{$object->createdUser->id}}-128{{$object->createdUser->image}}">
+                    @else
+                        <img class="center" src="{{ asset(config('settings.theme')) }}/img/avatar-1-128.png">
+                    @endif
                 @endif
             </div>
             <div class="rieltor-name">
-                <span>{{$object->createdUser->name}}</span>
+                <span>{{$object->working_id ? $object->workingUser->name : $object->createdUser->name}}</span>
             </div>
             <div class="rieltor-call">
-                <a href="tel:{{preg_replace("/[^,.0-9]/", '', $object->createdUser->telefon) }}" class="btn btn-success">Позвонить <br>{{ $object->createdUser->telefon }}</a>
+                <a href="tel:{{preg_replace("/[^,.0-9]/", '', $object->working_id ? $object->workingUser->telefon : $object->createdUser->telefon) }}" class="btn btn-success">Позвонить <br>{{ $object->working_id ? $object->workingUser->telefon : $object->createdUser->telefon }}</a>
                 {{--<button class="btn btn-success">Написать</button>--}}
             </div>
         </div>

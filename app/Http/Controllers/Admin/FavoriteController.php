@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Components\JavaScriptMaker;
 use Illuminate\Http\Request;
 use App\Object;
 use App\AObject;
@@ -15,8 +16,9 @@ class FavoriteController extends AdminController
         $this->template = config('settings.theme').'.admin.index';
     }
 
-    public function index() {
+    public function index(JavaScriptMaker $jsmaker) {
         $this->checkUser();
+        $jsmaker->setJs("filter", "", true, "", $this->randStr);
         $favorites = $this->user->favorites()->get();
         $a_favorites = $this->user->a_favorites()->get();
         $actions = array();

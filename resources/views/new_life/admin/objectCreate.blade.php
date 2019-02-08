@@ -30,14 +30,14 @@
                                 <div id="obj_area{{$city->id}}">
                                     <label class="col-sm-2 form-control-label" for="obj_area{{$city->id}}">Район</label>
                                     <div class="col-sm-10 col-md-4">
-                                        <p class="form-control-static">{!! Form::select('obj_area'.$city->id, $inputs["obj_area".$city->id], isset($object->gorod) ? (($object->gorod->id == $city->id) ? $object->raion->id : ""): old('obj_area'.$city->id), ["class" => "form-control"]) !!}</p>
+                                        <p class="form-control-static">{!! Form::select('obj_area'.$city->id, $inputs["obj_area".$city->id], isset($object->gorod) ? (($object->gorod->id == $city->id) ? $object->raion->id ?? "" : ""): old('obj_area'.$city->id), ["class" => "form-control"]) !!}</p>
                                     </div>
                                 </div>
                             @else
                                 <div id="obj_area{{$city->id}}" style="display: none;">
                                     <label class="col-sm-2 form-control-label" for="obj_area{{$city->id}}">Район</label>
                                     <div class="col-sm-10 col-md-4">
-                                        <p class="form-control-static">{!! Form::select('obj_area'.$city->id, $inputs["obj_area".$city->id], isset($object->gorod) ? (($object->gorod->id == $city->id) ? $object->raion->id : ""): old('obj_area'.$city->id), ["class" => "form-control"]) !!}</p>
+                                        <p class="form-control-static">{!! Form::select('obj_area'.$city->id, $inputs["obj_area".$city->id], isset($object->gorod) ? (($object->gorod->id == $city->id) ? $object->raion->id ?? "" : ""): old('obj_area'.$city->id), ["class" => "form-control"]) !!}</p>
                                     </div>
                                 </div>
                             @endif

@@ -28,13 +28,17 @@ class Object extends Model
         return $this->hasMany('App\Image');
     }
 
+    public function calls() {
+        return $this->hasMany('App\Call');
+    }
+
     public function getViewPrice() {
         return number_format($this->price, 0, '', ' ');
     }
 
     public function getViewAddress() {
         $city = str_replace(array("Волжский", "Волгоград"), array("Влж", "Влг"), $this->gorod->name);
-        $area = str_replace(array("микрорайон", "улица", "Квартал", "квартал", "поселок"), array("мкр", "ул", "кв-л", "кв-л", "п"), $this->raion->name);
+        $area = (isset($this->raion)) ?? str_replace(array("микрорайон", "улица", "Квартал", "квартал", "поселок"), array("мкр", "ул", "кв-л", "кв-л", "п"), $this->raion->name);
         return $city.", ".$area.", ".$this->address;
     }
 
@@ -65,7 +69,7 @@ class Object extends Model
 
     public function scopeInWork($query) {
         $user_id = Auth::user()->id;
-        return $query->whereWorking_id($user_id)->whereCompleted_id(null);
+        return $query->whereWorking_id($user_id);
     }
 
     public function scopeInWorkAndMaybeCompleted($query) {
@@ -74,7 +78,7 @@ class Object extends Model
     }
 
     public function scopeInPreWork($query) {
-        return $query->wherenotNull("pre_working_id");
+        return $query->wherenotNull("working_id");
     }
 
     public function scopeCompleted($query) {
@@ -96,7 +100,7 @@ class Object extends Model
 
     public function scopeMyOuted($query) {
         $user_id = Auth::user()->id;
-        return $query->whereOut("1")->whereCreated_id($user_id);
+        return $query->whereOut("1")->whereWorking_id($user_id);
     }
 
     public function scopeInNotWorkAll($query) {

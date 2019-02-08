@@ -2,6 +2,7 @@
 
 Route::get('/reconstruct', ['uses' => 'IndexController@reconstruction', 'as' => 'site.recon']);
 
+
 Auth::routes();
 
 Route::get('/', ['uses' => 'IndexController@index', 'as' => 'site.index']);
@@ -18,6 +19,7 @@ Route::get('/curlAvitoH/', ['uses' => 'IndexController@curlAvitoH', 'as' => 'obj
 Route::get('/curlAvitoHA/', ['uses' => 'IndexController@curlAvitoHA', 'as' => 'object.curlParseHA']);
 Route::get('/curlAvitoC/', ['uses' => 'IndexController@curlAvitoC', 'as' => 'object.curlParseC']);
 Route::get('/curlAvitoCA/', ['uses' => 'IndexController@curlAvitoCA', 'as' => 'object.curlParseCA']);
+Route::get('/calls', ['uses' => 'Admin\CallController@index', 'as' => 'call.parse']);
 Route::get('/checkactivate', ['uses' => 'Admin\ObjectController@checkCompleted', 'as' => 'object.check.completed']);
 Route::get('/districts', ['uses' => 'Admin\ObjectController@CreateDistricts', 'as' => 'object.createDistricts']);
 Route::get('/js/{file}', function($file = null)
@@ -27,9 +29,9 @@ Route::get('/js/{file}', function($file = null)
         return response()->download($path)->deleteFileAfterSend(true);
     }
 });
-Route::get('/xml/avito.xml', function($file = null)
+Route::get('/xml/{file}.xml', function($file = null)
 {
-    $path = storage_path().'/app/public/new_life/xml/avito.xml';
+    $path = storage_path().'/app/public/new_life/xml/' . $file . '.xml';
     if (file_exists($path)) {
         return response()->file($path);
     }
@@ -37,12 +39,14 @@ Route::get('/xml/avito.xml', function($file = null)
 //admin
 Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
 //
+    Route::get('/call/{data}/{url}', ['uses' => 'Admin\CallController@getCall', 'as' => 'call.get']);
     Route::get('/object/create/{category}/{deal}/{type}', ['uses' => 'Admin\ObjectController@create', 'as' => 'object.create']);
     Route::get('/avito/{order?}', ['uses' => 'Admin\IndexController@avito', 'as' => 'object.avito']);
     Route::resource('/object', 'Admin\ObjectController',['except' => ['index', 'create']]);
     Route::resource('/user', 'Admin\UserController');
     Route::resource('/post', 'Admin\PostController');
     Route::resource('/news', 'Admin\NewsController');
+    Route::resource('/ticket', 'Admin\TicketController');
     Route::resource('/comfort', 'Admin\ComfortController',['only' => ['index', 'store', 'destroy']]);
     Route::get('/transfer/{aobject}', ['uses' => 'Admin\AobjectController@transfer', 'as' => 'aobject.transfer']);
     Route::get('/favorites/', ['uses' => 'Admin\FavoriteController@index', 'as' => 'admin.favorites']);
@@ -77,3 +81,7 @@ Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
     //INDEX
     Route::get('/{type?}/{order?}',['uses' => 'Admin\IndexController@index','as' => 'adminIndex']);
 });
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

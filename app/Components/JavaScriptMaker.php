@@ -7,7 +7,6 @@
  */
 
 namespace App\Components;
-
 use Storage;
 
 class JavaScriptMaker
@@ -3658,7 +3657,7 @@ function after_clicked( page, job ) {
                 return document.querySelector('[data-marker=\"item-description/title\"]').innerText;
             });
             job.desc = page.evaluate(function() {
-                return document.querySelector('._3eWgi').innerText;
+                return document.querySelector('._1jdV1').innerText;
             });
             job.id = page.evaluate(function() {
                 return document.querySelector('[data-marker=\"item-stats/timestamp\"]').innerText;
@@ -3705,7 +3704,7 @@ function after_clicked( page, job ) {
                 return document.querySelector('[data-marker=\"item-description/price\"]').innerText;
             });
             job.material_h = page.evaluate(function () {
-                return document.querySelector('[data-marker=\"item-properties-item(6)/description\"]').innerText;
+                return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
             });
             job.material_c = page.evaluate(function () {
                 return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
@@ -3714,10 +3713,10 @@ function after_clicked( page, job ) {
                 return document.querySelector('[data-marker=\"item-properties-item(4)/description\"]').innerText;
             });
             job.floor_in = page.evaluate(function () {
-                return document.querySelector('[data-marker=\"item-properties-item(3)/description\"]').innerText;
+                return document.querySelector('[data-marker=\"item-properties-item(5)/description\"]').innerText;
             });
             job.distance = page.evaluate(function () {
-                return document.querySelector('[data-marker=\"item-properties-item(5)/description\"]').innerText;
+                return document.querySelector('[data-marker=\"item-properties-item(2)/description\"]').innerText;
             });
             job.deal = page.evaluate(function () {
                 return document.querySelector('[data-marker=\"item-properties-item(1)/description\"]').innerText;
@@ -3875,6 +3874,44 @@ next_page(page, job);
                 ";
                 $this->storageJs($randStr, true);
                 return;
+                break;
+            case "favor-page":
+                $this->content = "
+                        $('form.favor').submit(function (e) {
+            e.preventDefault();
+            var url = $(this).attr('action');
+            var data = $(this).serializeArray();
+            var i = $(this).find('i');
+            if(i.hasClass(\"fa-star-o\")) {
+                $.ajax({
+                type: \"POST\",
+                url: url,
+                data: data,
+                success: addFav
+                });
+            } else {
+                $.ajax({
+                type: \"POST\",
+                url: url,
+                data: data,
+                success: delFav
+                });
+            }        
+            });
+            
+        function addFav (data) {
+                $('#favor-'+data.id).removeClass(\"fa-star-o\").addClass(\"fa-star\");
+                var count = $('.fav-count').text();
+                $('.fav-count').text(+ count + 1);            
+            }
+        
+        function delFav (data) {
+            $('#favor-'+data.id).removeClass(\"fa-star\").addClass(\"fa-star-o\");
+            var count = $('.fav-count').text();
+            $('.fav-count').text(count - 1);    
+        }
+                ";
+                $this->storageJs($randStr, true);
                 break;
             default:
                 break;

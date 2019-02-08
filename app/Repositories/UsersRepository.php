@@ -79,7 +79,9 @@ class UsersRepository extends Repository
             $user->role_id = 3;
         }
         if ($this->user->can('editPolice', $this->user) && isset($data["polices"])) {
-            $user->polices()->sync($data["polices"]);
+            $user->polices()->sync(array_values($data["polices"]));
+        } elseif ($this->user->can('editPolice', $this->user) && !isset($data["polices"]))  {
+            $user->polices()->detach();
         }
         if(isset($data['password'])) {
             $user->password = bcrypt($data['password']);

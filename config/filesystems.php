@@ -83,6 +83,25 @@ return [
             'bucket' => env('AWS_BUCKET'),
         ],
 
+        'ftp' => [
+            'driver'   => 'ftp',
+            'host'     => 'records.megapbx.ru',
+            'username' => 'direktor@ip-plehanov.megapbx.ru',
+            'password' => 'Gkt[fyjd_2019',
+
+            // Optional FTP Settings...
+             'port'     => 21,
+             'root'     => '/recordings',
+             'passive'  => true,
+             'ssl'      => false,
+             'timeout'  => 3000,
+                'utf8' => false,
+            'recurseManually' => true,
+            'ignorePassiveAddress' => true
+        ],
+
     ],
+
+
 
 ];

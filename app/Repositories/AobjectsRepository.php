@@ -90,7 +90,7 @@ class AobjectsRepository extends Repository
                         $this->model->build_floors = $obj->build_floors;
                         $this->model->geo = $obj->geo;
                         $this->model->desc = $obj->desc;
-                        $this->model->client_name = (($obj->contact_name != "none") ? $obj->contact_name : "") . " " . (($obj->person_name != "none") ? $obj->person_name : "");
+                        $this->model->client_name = $obj->person_name;
                         $this->model->client_contacts = $obj->phone;
                         $this->model->price = $obj->price;
                         $this->model->link = $obj->url;
@@ -112,7 +112,7 @@ class AobjectsRepository extends Repository
                         $this->model->build_type = $obj->build_type;
                         $this->model->build_floors = $obj->build_floors;
                         $this->model->desc = $obj->desc;
-                        $this->model->client_name = (($obj->contact_name != "none") ? $obj->contact_name : "") . " " . (($obj->person_name != "none") ? $obj->person_name : "");
+                        $this->model->client_name = $obj->person_name;
                         $this->model->client_contacts = $obj->phone;
                         $this->model->price = $obj->price;
                         $this->model->link = $obj->url;
@@ -134,7 +134,7 @@ class AobjectsRepository extends Repository
                         $this->model->build_type = $obj->build_type;
                         $this->model->build_floors = $obj->build_floors;
                         $this->model->desc = $obj->desc;
-                        $this->model->client_name = (($obj->contact_name != "none") ? $obj->contact_name : "") . " " . (($obj->person_name != "none") ? $obj->person_name : "");
+                        $this->model->client_name = $obj->person_name;
                         $this->model->client_contacts = $obj->phone;
                         $this->model->price = $obj->price;
                         $this->model->link = $obj->url;

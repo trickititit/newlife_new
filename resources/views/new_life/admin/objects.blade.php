@@ -59,7 +59,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td class="table-address"><div class="tab_content">{{ $object->address }},<br>{{ str_replace(array("микрорайон", "улица", "Квартал", "квартал", "поселок"), array("мкр", "ул", "кв-л", "кв-л", "п"), $object->raion->name) }}, <br> {{ $object->gorod->name }}</div></td>
+                            <td class="table-address"><div class="tab_content">{{ $object->address }},<br>{{ str_replace(array("микрорайон", "улица", "Квартал", "квартал", "поселок"), array("мкр", "ул", "кв-л", "кв-л", "п"), isset($object->raion) ? $object->raion->name : "" ) }}, <br> {{ $object->gorod->name }}</div></td>
                             <td><div class="tab_content">{{ number_format($object->price) }}</div></td>
                             <td class="table-desc"><div class="tab_content">{{ $object->desc }}</div></td>
                             <td><div class="tab_content">{{ number_format($object->surcharge) }}</div></td>
@@ -69,6 +69,47 @@
                                         <span class="button-text js-name">Показать</span>  <span class="button-text js-father_name"></span><br>
                                         <span class="button-text js-phone"></span>
                                     </a>
+                                    @if($object->calls->isNotEmpty() && ($type == 'inwork' || $type == 'prework' || !$object->working_id))
+                                        <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#calls-{{$object->id}}">
+                                                Звонки
+                                            </button>
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="calls-{{$object->id}}" tabindex="-1" role="dialog" aria-labelledby="calls-{{$object->id}}Label" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="calls-{{$object->id}}Label">Звонки</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            @foreach($object->calls as $call)
+                                                                <div class="col-12">
+                                                                    <p>
+                                                                    @if($call->status)
+                                                                        Входящий
+                                                                    @else
+                                                                        Исходящий
+                                                                    @endif
+                                                                         {{$call->exec_at->format('Y-m-d H-i-s')}}
+                                                                    </p>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <audio style="width: 100%" controls preload="none">
+                                                                        <source src="{{route('call.get',[ 'data' => $call->exec_at->format('Y-m-d'),'url'=>$call->url])}}" type="audio/mpeg">
+                                                                    </audio>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                    @endif
                                 </div></td>
                             <td class="table-actions"><div class="tab_content"><div class="btn-actions centovka">
                                         {!! $actions["object".$object->id] !!}

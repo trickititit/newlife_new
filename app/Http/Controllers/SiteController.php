@@ -69,7 +69,7 @@ class SiteController extends Controller
             'tether' => array('url' => '<script src="'.$this->pub_path.'/js/lib/tether/tether.min.js"></script>'),
             'bootstrap' => array('url' => '<script src="'.$this->pub_path.'/js/lib/bootstrap/bootstrap.min.js"></script>'),
             'plugins' => array('url' => '<script src="'.$this->pub_path.'/js/plugins.js"></script>'),
-            'izi' => array('url' => '<script src="'.$this->pub_path.'/js/iziModal.min.js"></script>'),            
+            'izi' => array('url' => '<script src="'.$this->pub_path.'/js/iziModal.min.js"></script>'),
             'notify' => array('url' => '<script src="'.$this->pub_path.'/js/lib/bootstrap-notify/bootstrap-notify.min.js"></script>'),
         );
         $this->m_rep = $m_rep;

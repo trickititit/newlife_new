@@ -417,7 +417,7 @@
         $('.table .table-desc').click(function () {
             var tab_height = $(this).find('.tab_content').height();
             if (tab_height == 70) {
-                $(this).parent().find('.tab_content').stop(true).animate({ height: "250px"}, 300)
+                $(this).parent().find('.tab_content').stop(true).animate({ height: "100%"}, 300)
             } else {
                 $(this).parent().find('.tab_content').stop(true).animate({ height: "70px"}, 300)
             }

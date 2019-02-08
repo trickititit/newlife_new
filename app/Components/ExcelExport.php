@@ -95,14 +95,14 @@ class ExcelExport {
     public function formatObject($object){
         // Field Area
         $object_ = array();
-        $area = $object->raion->name;
+        $area = $object->raion->name ?? "";
         $area = str_replace( 'микрорайон', 'мкр.', $area);
         $area = str_replace( 'Квартал', 'Кв-л', $area);
         $object_ = array_add($object_, "area", $area);
 
         // Field Street
-        $street = $object->address."\r\n".$object->floor."/".$object->build_floors. " этаж, ".$object->square. " м²";
-        $street_h = $object->address."\r\n".$object->build_floors." этаж, ".$object->home_square. " м²";
+        $street = ($object->address ?? "") ."  " . ($object->floor ?? "") . "/" . ($object->build_floors ?? "") . " этаж, " . ($object->square ?? "") . " м²";
+        $street_h = ($object->address ?? "") ."  " . ($object->build_floors ?? "") . " этаж, " . ($object->home_square ?? "") . " м²";
         if ($object->category == 2) {
             $object_ = array_add($object_, "street", $street_h);
         } else {
@@ -110,23 +110,23 @@ class ExcelExport {
         }
 
         // Field Price
-        $price = number_format( $object->price );
+        $price = number_format( $object->price ?? "" );
         $object_ = array_add($object_, "price", $price);
 
         // Field Desc
-        $desc = strip_tags( $object->desc );
+        $desc = strip_tags( $object->desc ?? "" );
         $object_ = array_add($object_, "desc", $desc);
 
         // Field Doplata
-        $surcharge = number_format( $object->surcharge );
+        $surcharge = number_format( $object->surcharge ?? "" );
         $object_ = array_add($object_, "surcharge", $surcharge);
 
         // Field Comments
-        $comm = strip_tags( $object->comment );
+        $comm = strip_tags( $object->comment ?? "" );
         $object_ = array_add($object_, "comment", $comm);
 
         // Field Contacts
-        $cont = strip_tags( $object->client->name."\r\n".$object->client->phone );
+        $cont = strip_tags( ($object->client->name ?? "") . "   " . ($object->client->phone ?? ""));
         $object_ = array_add($object_, "contact", $cont);
 
         // Field Date

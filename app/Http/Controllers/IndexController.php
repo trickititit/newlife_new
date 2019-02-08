@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Object;
 use App\Post;
+use Illuminate\Support\Facades\App;
 use Storage;
 use App\Repositories\ObjectsRepository;
 use App\Repositories\CitiesRepository;
@@ -18,6 +19,7 @@ use Gate;
 use URL;
 use Route;
 use Auth;
+use App\Parsers\Avito\AvitoMobileParser;
 
 class IndexController extends SiteController
 {
@@ -68,70 +70,122 @@ class IndexController extends SiteController
         $this->objectAvitoToBase($output, $jsmaker);
     }
 
+    /**
+     * @param JavaScriptMaker $jsmaker
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+
     public function curlAvitoK(JavaScriptMaker $jsmaker) {
 //        if (request()->ip() != "193.124.189.57"){
 //            abort(404);
 //        }
-        $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/kvartiry/prodam/vtorichka?user=1";
-        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
-        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
-        exec($cmd, $output);
-        $this->objectAvitoToBase($output, $jsmaker);
+//        $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/kvartiry/prodam/vtorichka?user=1";
+//        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+//        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+//        exec($cmd, $output);
+//        $this->objectAvitoToBase($output, $jsmaker);
+        $parser = new AvitoMobileParser(new \App\Repositories\AobjectsRepository(new \App\Aobject));
+        $parser->UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) Gecko/20100101 Firefox/64.0";
+        $parser->CategoryId = 24;
+        try {
+            $parser->ParseAllPages(1, Carbon::now()->timestamp - 200);
+        }catch (\Exception $exception) {
+            dd($exception->getMessage());
+        }
+
     }
 
     public function curlAvitoKA(JavaScriptMaker $jsmaker) {
-        if (request()->ip() != "193.124.189.57"){
-            abort(404);
+//        if (request()->ip() != "193.124.189.57"){
+//            abort(404);
+//        }
+//        $url = "https://m.avito.ru/srednyaya_ahtuba/kvartiry/prodam/vtorichka?user=1";
+//        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+//        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+//        exec($cmd, $output);
+//        $this->objectAvitoToBase($output, $jsmaker);
+        $parser = new AvitoMobileParser(new \App\Repositories\AobjectsRepository(new \App\Aobject));
+        $parser->CategoryId = 24;
+        $parser->LocationId = 625270;
+        try {
+            $parser->ParseAllPages(1, Carbon::now()->timestamp - 200);
+        }catch (\Exception $exception) {
+            dd($exception->getMessage());
         }
-        $url = "https://m.avito.ru/srednyaya_ahtuba/kvartiry/prodam/vtorichka?user=1";
-        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
-        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
-        exec($cmd, $output);
-        $this->objectAvitoToBase($output, $jsmaker);
     }
 
     public function curlAvitoH(JavaScriptMaker $jsmaker) {
 //        if (request()->ip() != "193.124.189.57"){
 //            abort(404);
 //        }
-        $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/doma_dachi_kottedzhi/prodam?user=1";
-        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
-        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
-        exec($cmd, $output);
-        $this->objectAvitoToBase($output, $jsmaker);
+//        $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/doma_dachi_kottedzhi/prodam?user=1";
+//        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+//        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+//        exec($cmd, $output);
+//        $this->objectAvitoToBase($output, $jsmaker);
+        $parser = new AvitoMobileParser(new \App\Repositories\AobjectsRepository(new \App\Aobject));
+        $parser->CategoryId = 25;
+        try {
+            $parser->ParseAllPages(1, Carbon::now()->timestamp - 200);
+        }catch (\Exception $exception) {
+            dd($exception->getMessage());
+        }
     }
 
     public function curlAvitoHA(JavaScriptMaker $jsmaker) {
-        if (request()->ip() != "193.124.189.57"){
-            abort(404);
+//        if (request()->ip() != "193.124.189.57"){
+//            abort(404);
+//        }
+//        $url = "https://m.avito.ru/srednyaya_ahtuba/doma_dachi_kottedzhi/prodam?user=1";
+//        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+//        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+//        exec($cmd, $output);
+//        $this->objectAvitoToBase($output, $jsmaker);
+        $parser = new AvitoMobileParser(new \App\Repositories\AobjectsRepository(new \App\Aobject));
+        $parser->CategoryId = 25;
+        $parser->LocationId = 625270;
+        try {
+            $parser->ParseAllPages(1, Carbon::now()->timestamp - 200);
+        }catch (\Exception $exception) {
+            dd($exception->getMessage());
         }
-        $url = "https://m.avito.ru/srednyaya_ahtuba/doma_dachi_kottedzhi/prodam?user=1";
-        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
-        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
-        exec($cmd, $output);
-        $this->objectAvitoToBase($output, $jsmaker);
     }
 
     public function curlAvitoC(JavaScriptMaker $jsmaker) {
 //        if (request()->ip() != "193.124.189.57"){
 //            abort(404);
 //        }
-        $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/komnaty/prodam?user=1";
-        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
-        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
-        exec($cmd, $output);
-        $this->objectAvitoToBase($output, $jsmaker);
+//        $url = "https://m.avito.ru/volgogradskaya_oblast_volzhskiy/komnaty/prodam?user=1";
+//        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+//        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+//        exec($cmd, $output);
+//        $this->objectAvitoToBase($output, $jsmaker);
+        $parser = new AvitoMobileParser(new \App\Repositories\AobjectsRepository(new \App\Aobject));
+        $parser->CategoryId = 23;
+        try {
+            $parser->ParseAllPages(1, Carbon::now()->timestamp - 200);
+        }catch (\Exception $exception) {
+            dd($exception->getMessage());
+        }
     }
 
     public function curlAvitoCA(JavaScriptMaker $jsmaker) {
-        if (request()->ip() != "193.124.189.57"){
-            abort(404);
+//        if (request()->ip() != "193.124.189.57"){
+//            abort(404);
+//        }
+//        $url = "https://m.avito.ru/srednyaya_ahtuba/komnaty/prodam?user=1";
+//        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
+//        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
+//        exec($cmd, $output);
+//        $this->objectAvitoToBase($output, $jsmaker);
+        $parser = new AvitoMobileParser(new \App\Repositories\AobjectsRepository(new \App\Aobject));
+        $parser->CategoryId = 23;
+        $parser->LocationId = 625270;
+        try {
+            $parser->ParseAllPages(1, Carbon::now()->timestamp - 200);
+        }catch (\Exception $exception) {
+            dd($exception->getMessage());
         }
-        $url = "https://m.avito.ru/srednyaya_ahtuba/komnaty/prodam?user=1";
-        $jsmaker->setJs("parse-avito", $url, true, "", $this->randStr);
-        $cmd = 'phantomjs '.base_path("phantomjs/bin/avito.js");
-        exec($cmd, $output);
-        $this->objectAvitoToBase($output, $jsmaker);
     }
 
     public function checkArray($array, $type) {
@@ -166,7 +220,6 @@ class IndexController extends SiteController
             $jsmaker->setJs("parse-avito-page", $req, true, "", $this->randStr);
             $cmd = "phantomjs ".base_path("phantomjs/bin/avito.js");
             exec($cmd, $outputs);
-            dump($outputs);
             $object_avito = "";
             foreach ($outputs as $output) {
                 if(!$this->isStart($object_, "{")) continue;
@@ -307,7 +360,7 @@ class IndexController extends SiteController
         $search_types = ["дом", "дачу", "коттедж", "таунхаус"];
         $types = ["Дом", "Дача", "Коттедж", "Таунхаус"];
         $search_build_types_2 = ["кирпич", "брус", "бревно", "газоблоки", "металл", "пеноблоки", "сэндвич-панели", "ж/б панели", "экспериментальные материалы"];
-        $build_types_2 = ["Кирпич", "Брус", "Бревно", "Металл", "Газоблоки", "Пеноблоки", "Сендвич-панели", "Ж/б панели", "Экспериментальные материалы"];
+        $build_types_2 = ["Кирпич", "Брус", "Бревно", "Металл", "Газоблоки", "Пеноблоки", "Сэндвич-панели", "Ж/б панели", "Экспериментальные материалы"];
         switch ($category) {
             case '1':
                 switch ($param) {
