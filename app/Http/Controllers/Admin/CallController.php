@@ -30,17 +30,8 @@ class CallController extends AdminController
     {
         $ftp = new FtpMegafon("records.megapbx.ru", "direktor@ip-plehanov.megapbx.ru", "Gkt[fyjd_2019");
         $yesterday = Carbon::now()->subDay()->format('Y-m-d');
-        $contents = $ftp->getList($yesterday);
-//        $contents = $ftp->getListAll();
-        $objects = $this->o_rep->get();
-        foreach ($objects as $object) {
-            $object->client = json_decode($object->client);
-            $phone = preg_replace("/[^,.0-9]/", '', $object->client->phone);
-            if ($phone[0] == 8 || $phone[0] == 7) {
-                $phone = substr($phone, 1);
-            }
-            $object->client->phone = $phone;
-        }
+//        $contents = $ftp->getList($yesterday);
+        $contents = $ftp->getListAll();
 //        foreach ($contents as $content){
 //            if ($content[0] == ".") continue;
 //            $contents_ = $ftp->getList($content);
@@ -66,14 +57,23 @@ class CallController extends AdminController
                     }
                     $object->client->phone = $phone;
                 }
-                $calls = $this->parseCalls($contents);
-                foreach ($calls as &$call) {
-                    foreach ($objects as $object) {
-                        if ($object->client->phone == $call["number"]) {
-                            $call["object_id"] = $object->id;
+                foreach ($contents as $content) {
+                    if ($content[0] == ".") continue;
+                    $contents_ = $ftp->getList($content);
+                    if ($contents_) {
+                        $calls = $this->parseCalls($contents_);
+                        foreach ($calls as &$call) {
+                            if (\App\Call::where("url", $call["url"])->exists()) {
+                                continue;
+                            }
+                            foreach ($objects as $object) {
+                                if ($object->client->phone == $call["number"]) {
+                                    $call["object_id"] = $object->id;
+                                }
+                            }
+                            $this->call_rep->Add($call);
                         }
                     }
-                    $this->call_rep->Add($call);
                 }
             }
     }
