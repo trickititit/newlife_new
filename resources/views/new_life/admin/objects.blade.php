@@ -1,4 +1,12 @@
     {!! $filter !!}
+    <p>
+        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="true" aria-controls="collapseExample">
+            Карта
+        </button>
+    </p>
+    <div class="collapse" id="collapseExample">
+        <div id="mapid" style="width: 100%; height: 600px; z-index: 70;"></div>
+    </div>
     <ul class="nav nav-tabs">
     @if($menus)
         @include(config('settings.theme').'.admin.objectsMenuItems',['items'=>$menus->roots(), "type" => $type])
@@ -34,7 +42,11 @@
                     <th >Цена</th>
                     <th >Описание</th>
                     <th >Доплата</th>
+                    @if($type == "outed")
+                    <th >Куда выгруженно</th>
+                    @else
                     <th >Комментарий</th>
+                    @endif
                     <th >Контакты</th>
                     <th >Действия</th>
                 </tr>
@@ -63,7 +75,24 @@
                             <td><div class="tab_content">{{ number_format($object->price) }}</div></td>
                             <td class="table-desc"><div class="tab_content">{{ $object->desc }}</div></td>
                             <td><div class="tab_content">{{ number_format($object->surcharge) }}</div></td>
-                            <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
+                            @if($type == "outed")
+                                <td class="table-comment"><div class="tab_content">
+                                        @if($object->out_avito == 1)
+                                            <span class="badge badge-success">Авито</span>
+                                        @endif
+                                        @if($object->out_yandex == 1)
+                                            <span class="badge badge-danger">Yandex</span>
+                                        @endif
+                                        @if($object->out_click == 1)
+                                                <span class="badge badge-info">Click</span>
+                                        @endif
+                                        @if($object->out_all == 1)
+                                            <span class="badge badge-primary">All</span>
+                                        @endif
+                                    </div></td>
+                            @else
+                                <td class="table-comment"><div class="tab_content">{{ $object->comment }}</div></td>
+                            @endif
                             <td class="table-contact"><div class="tab_content">
                                     <a href="{{route('object.phone', ['object'=>$object->alias])}}" data-show="false" data-id="{{$object->id}}" class="btn btn-success btn-phone js-show-phone col-md-12">
                                         <span class="button-text js-name">Показать</span>  <span class="button-text js-father_name"></span><br>
@@ -180,5 +209,33 @@
                     </ul>
                 </nav>
             </div>
+
        </div><!--.box-typical-body-->
     </section>
+
+    <div class="modal fade modal-out"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="outModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="modal-close" data-dismiss="modal" aria-label="Закрыть">
+                        <i class="font-icon-close-2"></i>
+                    </button>
+                    <h4 class="modal-title" id="outModalLabel">Выгрузка объекта</h4>
+                </div>
+                <div class="modal-body">
+                    {!! Form::open(["url" => route('object.out',["object" => ""]), "class" => "", 'method' => "post", "id" => "out-form"]) !!}
+                    {!! Form::select('target', $inputs["out"], old('target'), ["class" => "form-control", "id" => "target"]) !!}
+                    {!! Form::button('Выгрузить', ['class' => 'form-control btn btn-success','type'=>'submit', 'style' => 'margin-top: 15px;']) !!}
+                    <input type="hidden" name="_method" value="PUT">
+                    {!! Form::close() !!}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-rounded btn-default" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div><!--.modal-->

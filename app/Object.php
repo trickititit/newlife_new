@@ -98,6 +98,22 @@ class Object extends Model
         return $query->whereOut("1");
     }
 
+    public function scopeOutedAvito($query) {
+        return $query->whereOut_avito("1");
+    }
+
+    public function scopeOutedYandex($query) {
+        return $query->whereOut_yandex("1");
+    }
+
+    public function scopeOutedClick($query) {
+        return $query->whereOut_click("1");
+    }
+
+    public function scopeOutedAll($query) {
+        return $query->whereOut_all("1");
+    }
+
     public function scopeMyOuted($query) {
         $user_id = Auth::user()->id;
         return $query->whereOut("1")->whereWorking_id($user_id);

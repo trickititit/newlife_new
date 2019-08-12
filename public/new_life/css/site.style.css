@@ -617,4 +617,50 @@ body {
   font-size: 18px;
   padding: 10px; }
 
+.BlockLayout--typeFlex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.BlockContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  position: relative;
+  min-height: 8.6rem;
+  height: 100%;
+  color: #fff;
+  background-color: #212529;
+  border: .6rem solid #212529;
+}
+
+.Block {
+  position: relative;
+  display: block;
+  height: 100px;
+  margin: 10px 0;
+}
+
+.Pattern--typeHalftone {
+  background-image: radial-gradient(currentColor 24%,transparent 25%),radial-gradient(currentColor 24%,transparent 25%);
+  background-position: 0 0,.6rem .6rem;
+  background-size: 1.2rem 1.2rem;
+  -webkit-animation: halftone .48s steps(3) infinite both paused;
+  animation: halftone .48s steps(3) infinite both paused;
+}
+
+.Pattern {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+}
+
 /*# sourceMappingURL=site.style.css.map */

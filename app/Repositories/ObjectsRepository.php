@@ -21,17 +21,18 @@ class ObjectsRepository extends Repository {
         $this->i_rep = $i_rep;
         $this->c_rep = $c_rep;
         $this->a_rep = $a_rep;
-
     }
 
-   public function addObject($request, $area = null) {
+    public function getAllInt($string) {
+        $string = preg_replace("/[^0-9]/", '', $string);
+        if ($string == "") $string = 0;
+        return $string;
+    }
+
+    public function addObject($request, $area = null) {
+
         if ($request->has("obj_type")) {
             $check = $this->checkObject($request);
-            if($check){
-                return array(
-                    'error' => 'Такой объект существует. Нажмите на сообщение, чтобы просмотреть объект.',
-                    'url' => route('site.object',['object'=>$check->alias]));
-                            }
             $obj_type = $request->obj_type;
             $obj_area_input = "obj_area" . $request->obj_city;
             $user = Auth::user();
@@ -50,7 +51,7 @@ class ObjectsRepository extends Repository {
                 $this->model->square_life = $request->obj_square_life;
                 $this->model->build_type = $request->obj_build_type_1;
                 $this->model->build_floors = $request->obj_home_floors_1;
-                $this->model->desc = $request->obj_desc;
+                $this->model->desc = nl2br($request->obj_desc);
                 $this->model->comment = $request->obj_comment;
                 $this->model->price_square =  preg_replace("/[^0-9]/", '',$request->obj_price_square);
                 $this->model->price =  preg_replace("/[^0-9]/", '',$request->obj_price);
@@ -61,6 +62,18 @@ class ObjectsRepository extends Repository {
                 $this->model->spec_offer_span_1 = (isset($request->spec_offer_span_1)? $request->spec_offer_span_1 : null);
                 $this->model->spec_offer_span_2 = (isset($request->spec_offer_span_2)? $request->spec_offer_span_2 : null);
                 $this->model->spec_offer = (isset($request->spec_offer)? 1 : null);
+                $phones = array();
+                if(isset($request->client_phone2)) {
+                    $phones = $this->getAllInt($request->client_phone2);
+                    foreach ($phones as &$phone1) {
+                        $phone = preg_replace("/[^,.0-9]/", '', $phone1);
+                        if ($phone[0] == 8 || $phone[0] == 7) {
+                            $phone = substr($phone, 1);
+                        }
+                        $phone1 = $phone;
+                    }
+                }
+                $this->model->phones = implode(";", $phones);
                 $client = new \stdClass;
                 $client->name = $request->client_name;
                 $client->family = $request->client_family;
@@ -72,7 +85,7 @@ class ObjectsRepository extends Repository {
                 $client->pasport = $request->client_pasport;
                 $client->pasport_who_take = $request->client_pasport_who_take;
                 $client->pasport_date = $request->client_pasport_date;
-                $client->need = (isset($request->$request->client_need)? implode(",", $request->client_need) : null);
+                $client->need = (isset($request->client_need)? implode(",", $request->client_need) : null);
                 $this->model->client = json_encode($client, JSON_UNESCAPED_UNICODE);
                     if($this->model->save()) {
                         $this->i_rep->createImgs($temp_obj_id, $this->model->id);
@@ -82,6 +95,15 @@ class ObjectsRepository extends Repository {
                         }
                         $this->model->alias = $this->getAlias($this->model);
                         $this->model->update();
+                        if($request->obj_transfer_id) {
+                            $trans_obj =  \App\Aobject::find($request->obj_transfer_id);
+                            $trans_obj->delete();
+                        }
+                        if($check){
+                            return array(
+                                'status' => 'Такой объект существует. Нажмите на сообщение, чтобы просмотреть объект.',
+                                'url' => route('site.object',['object'=>$check->alias]));
+                            }
                         return ['status' => 'Материал добавлен'];
                     }
                 break;
@@ -96,7 +118,7 @@ class ObjectsRepository extends Repository {
                     $this->model->build_floors = $request->obj_home_floors_2;
                     $this->model->distance = $request->obj_distance;
                     $this->model->earth_square = $request->obj_earth_square;
-                    $this->model->desc = $request->obj_desc;
+                    $this->model->desc = nl2br($request->obj_desc);
                     $this->model->comment = $request->obj_comment;
                     $this->model->price_square =  preg_replace("/[^0-9]/", '',$request->obj_price_square);
                     $this->model->price =  preg_replace("/[^0-9]/", '',$request->obj_price);
@@ -107,6 +129,18 @@ class ObjectsRepository extends Repository {
                     $this->model->spec_offer_span_1 = (isset($request->spec_offer_span_1)? $request->spec_offer_span_1 : null);
                     $this->model->spec_offer_span_2 = (isset($request->spec_offer_span_2)? $request->spec_offer_span_2 : null);
                     $this->model->spec_offer = (isset($request->spec_offer)? 1 : null);
+                    $phones = array();
+                    if(isset($request->client_phone2)) {
+                        $phones = $this->getAllInt($request->client_phone2);
+                        foreach ($phones as &$phone1) {
+                            $phone = preg_replace("/[^,.0-9]/", '', $phone1);
+                            if ($phone[0] == 8 || $phone[0] == 7) {
+                                $phone = substr($phone, 1);
+                            }
+                            $phone1 = $phone;
+                        }
+                    }
+                    $this->model->phones = implode(";", $phones);
                     $client = new \stdClass;
                     $client->name = $request->client_name;
                     $client->family = $request->client_family;
@@ -118,7 +152,7 @@ class ObjectsRepository extends Repository {
                     $client->pasport = $request->client_pasport;
                     $client->pasport_who_take = $request->client_pasport_who_take;
                     $client->pasport_date = $request->client_pasport_date;
-                    $client->need = (isset($request->$request->client_need)? implode(",", $request->client_need) : null);
+                    $client->need = (isset($request->client_need)? implode(",", $request->client_need) : null);
                     $this->model->client = json_encode($client, JSON_UNESCAPED_UNICODE);
                     if($this->model->save()) {
                         $this->i_rep->createImgs($temp_obj_id, $this->model->id);
@@ -128,6 +162,15 @@ class ObjectsRepository extends Repository {
                         }
                         $this->model->alias = $this->getAlias($this->model);
                         $this->model->update();
+                        if($request->obj_transfer_id) {
+                            $trans_obj =  \App\Aobject::find($request->obj_transfer_id);
+                            $trans_obj->delete();
+                        }
+                        if($check){
+                            return array(
+                                'status' => 'Такой объект существует. Нажмите на сообщение, чтобы просмотреть объект.',
+                                'url' => route('site.object',['object'=>$check->alias]));
+                        }
                         return ['status' => 'Материал добавлен'];
                     }
                 break;
@@ -144,7 +187,7 @@ class ObjectsRepository extends Repository {
                     $this->model->square_life = $request->obj_square_life;
                     $this->model->build_type = $request->obj_build_type_1;
                     $this->model->build_floors = $request->obj_home_floors_1;
-                    $this->model->desc = $request->obj_desc;
+                    $this->model->desc = nl2br($request->obj_desc);
                     $this->model->comment = $request->obj_comment;
                     $this->model->price_square =  preg_replace("/[^0-9]/", '',$request->obj_price_square);
                     $this->model->price =  preg_replace("/[^0-9]/", '',$request->obj_price);
@@ -155,6 +198,18 @@ class ObjectsRepository extends Repository {
                     $this->model->spec_offer_span_1 = (isset($request->spec_offer_span_1)? $request->spec_offer_span_1 : null);
                     $this->model->spec_offer_span_2 = (isset($request->spec_offer_span_2)? $request->spec_offer_span_2 : null);
                     $this->model->spec_offer = (isset($request->spec_offer)? 1 : null);
+                    $phones = array();
+                    if(isset($request->client_phone2)) {
+                        $phones = $this->getAllInt($request->client_phone2);
+                        foreach ($phones as &$phone1) {
+                            $phone = preg_replace("/[^,.0-9]/", '', $phone1);
+                            if ($phone[0] == 8 || $phone[0] == 7) {
+                                $phone = substr($phone, 1);
+                            }
+                            $phone1 = $phone;
+                        }
+                    }
+                    $this->model->phones = implode(";", $phones);
                     $client = new \stdClass;
                     $client->name = $request->client_name;
                     $client->family = $request->client_family;
@@ -166,7 +221,7 @@ class ObjectsRepository extends Repository {
                     $client->pasport = $request->client_pasport;
                     $client->pasport_who_take = $request->client_pasport_who_take;
                     $client->pasport_date = $request->client_pasport_date;
-                    $client->need = (isset($request->$request->client_need)? implode(",", $request->client_need) : null);
+                    $client->need = (isset($request->client_need)? implode(",", $request->client_need) : null);
                     $this->model->client = json_encode($client, JSON_UNESCAPED_UNICODE);
                     if($this->model->save()) {
                         $this->i_rep->createImgs($temp_obj_id, $this->model->id);
@@ -176,6 +231,15 @@ class ObjectsRepository extends Repository {
                         }
                         $this->model->alias = $this->getAlias($this->model);
                         $this->model->update();
+                        if($request->obj_transfer_id) {
+                            $trans_obj =  \App\Aobject::find($request->obj_transfer_id);
+                            $trans_obj->delete();
+                        }
+                        if($check){
+                            return array(
+                                'status' => 'Такой объект существует. Нажмите на сообщение, чтобы просмотреть объект.',
+                                'url' => route('site.object',['object'=>$check->alias]));
+                        }
                         return ['status' => 'Материал добавлен'];
                     }
                 break;
@@ -274,7 +338,7 @@ class ObjectsRepository extends Repository {
                     $object->square_life = $request->obj_square_life;
                     $object->build_type = $request->obj_build_type_1;
                     $object->build_floors = $request->obj_home_floors_1;
-                    $object->desc = $request->obj_desc;
+                    $object->desc = nl2br($request->obj_desc);
                     $object->comment = $request->obj_comment;
                     $object->price_square =  preg_replace("/[^0-9]/", '',$request->obj_price_square);
                     $object->price =  preg_replace("/[^0-9]/", '',$request->obj_price);
@@ -284,6 +348,18 @@ class ObjectsRepository extends Repository {
                     $object->spec_offer_span_1 = (isset($request->spec_offer_span_1)? $request->spec_offer_span_1 : null);
                     $object->spec_offer_span_2 = (isset($request->spec_offer_span_2)? $request->spec_offer_span_2 : null);
                     $object->spec_offer = (isset($request->spec_offer)? 1 : null);
+                    $phones = array();
+                    if(isset($request->client_phone2)) {
+                        $phones = $this->getAllInt($request->client_phone2);
+                        foreach ($phones as &$phone1) {
+                            $phone = preg_replace("/[^,.0-9]/", '', $phone1);
+                            if ($phone[0] == 8 || $phone[0] == 7) {
+                                $phone = substr($phone, 1);
+                            }
+                            $phone1 = $phone;
+                        }
+                    }
+                    $object->phones = implode(";", $phones);
                     $client = new \stdClass;
                     $client->name = $request->client_name;
                     $client->family = $request->client_family;
@@ -293,7 +369,7 @@ class ObjectsRepository extends Repository {
                     $client->phone = $request->client_phone;
                     $client->mail = $request->client_mail;
                     $client->pasport = $request->client_pasport;
-                    $client->need = (isset($request->$request->client_need)? implode(",", $request->client_need) : null);
+                    $client->need = (isset($request->client_need)? implode(",", $request->client_need) : null);
                     $client->pasport_who_take = $request->client_pasport_who_take;
                     $client->pasport_date = $request->client_pasport_date;
                     $object->client = json_encode($client, JSON_UNESCAPED_UNICODE);
@@ -320,7 +396,7 @@ class ObjectsRepository extends Repository {
                     $object->build_floors = $request->obj_home_floors_2;
                     $object->distance = $request->obj_distance;
                     $object->earth_square = $request->obj_earth_square;
-                    $object->desc = $request->obj_desc;
+                    $object->desc = nl2br($request->obj_desc);
                     $object->comment = $request->obj_comment;
                     $object->price_square =  preg_replace("/[^0-9]/", '',$request->obj_price_square);
                     $object->price =  preg_replace("/[^0-9]/", '',$request->obj_price);
@@ -330,6 +406,18 @@ class ObjectsRepository extends Repository {
                     $object->spec_offer_span_1 = (isset($request->spec_offer_span_1)? $request->spec_offer_span_1 : null);
                     $object->spec_offer_span_2 = (isset($request->spec_offer_span_2)? $request->spec_offer_span_2 : null);
                     $object->spec_offer = (isset($request->spec_offer)? 1 : null);
+                    $phones = array();
+                    if(isset($request->client_phone2)) {
+                        $phones = $this->getAllInt($request->client_phone2);
+                        foreach ($phones as &$phone1) {
+                            $phone = preg_replace("/[^,.0-9]/", '', $phone1);
+                            if ($phone[0] == 8 || $phone[0] == 7) {
+                                $phone = substr($phone, 1);
+                            }
+                            $phone1 = $phone;
+                        }
+                    }
+                    $object->phones = implode(";", $phones);
                     $client = new \stdClass;
                     $client->name = $request->client_name;
                     $client->family = $request->client_family;
@@ -341,7 +429,7 @@ class ObjectsRepository extends Repository {
                     $client->pasport = $request->client_pasport;
                     $client->pasport_who_take = $request->client_pasport_who_take;
                     $client->pasport_date = $request->client_pasport_date;
-                    $client->need = (isset($request->$request->client_need)? implode(",", $request->client_need) : null);
+                    $client->need = (isset($request->client_need)? implode(",", $request->client_need) : null);
                     $object->client = json_encode($client, JSON_UNESCAPED_UNICODE);
                     if($object->update()) {
                         $comforts = $this->c_rep->getComfortsId($request->comfort);
@@ -368,7 +456,7 @@ class ObjectsRepository extends Repository {
                     $object->square_life = $request->obj_square_life;
                     $object->build_type = $request->obj_build_type_1;
                     $object->build_floors = $request->obj_home_floors_1;
-                    $object->desc = $request->obj_desc;
+                    $object->desc = nl2br($request->obj_desc);
                     $object->comment = $request->obj_comment;
                     $object->price_square =  preg_replace("/[^0-9]/", '',$request->obj_price_square);
                     $object->price =  preg_replace("/[^0-9]/", '',$request->obj_price);
@@ -378,6 +466,18 @@ class ObjectsRepository extends Repository {
                     $object->spec_offer_span_1 = (isset($request->spec_offer_span_1)? $request->spec_offer_span_1 : null);
                     $object->spec_offer_span_2 = (isset($request->spec_offer_span_2)? $request->spec_offer_span_2 : null);
                     $object->spec_offer = (isset($request->spec_offer)? 1 : null);
+                    $phones = array();
+                    if(isset($request->client_phone2)) {
+                        $phones = $this->getAllInt($request->client_phone2);
+                        foreach ($phones as &$phone1) {
+                            $phone = preg_replace("/[^,.0-9]/", '', $phone1);
+                            if ($phone[0] == 8 || $phone[0] == 7) {
+                                $phone = substr($phone, 1);
+                            }
+                            $phone1 = $phone;
+                        }
+                    }
+                    $object->phones = implode(";", $phones);
                     $client = new \stdClass;
                     $client->name = $request->client_name;
                     $client->family = $request->client_family;
@@ -389,7 +489,7 @@ class ObjectsRepository extends Repository {
                     $client->pasport = $request->client_pasport;
                     $client->pasport_who_take = $request->client_pasport_who_take;
                     $client->pasport_date = $request->client_pasport_date;
-                    $client->need = (isset($request->$request->client_need)? implode(",", $request->client_need) : null);
+                    $client->need = (isset($request->client_need)? implode(",", $request->client_need) : null);
                     $object->client = json_encode($client, JSON_UNESCAPED_UNICODE);
                     if($object->update()) {
                         $comforts = $this->c_rep->getComfortsId($request->comfort);

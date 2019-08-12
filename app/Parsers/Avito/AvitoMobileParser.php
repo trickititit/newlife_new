@@ -10,7 +10,10 @@ namespace App\Parsers\Avito;
 
 use GuzzleHttp\Client;
 use App\Repositories\AobjectsRepository;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Log;
+use App\Aobject;
 
 
 /**
@@ -27,7 +30,7 @@ class AvitoMobileParser
     /**
      * @var string
      */
-    public $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.80 Safari/537.36';
+    public $UserAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1';
     public $Delay = 5;
     /**
      * @var int
@@ -114,24 +117,25 @@ class AvitoMobileParser
 
         if ($res->getStatusCode() != '200')
             throw new \Exception('Не удается подключиться к сайту');
-        $subject = $res->getBody();
+  //      $subject = $res->getBody();
 
-        $tag = 'script';
-        $matchGroup = $this->getTags($tag, $subject);
-        foreach ($matchGroup as $item) {
-            if (strpos($item, 'mstatic/build') !== false) {
-                if (preg_match('~"([^"]*)"~u', $item, $m)) {
-
-                    $res = $this->client->request('GET', $this->BaseUrl . $m[1], []);
-                    $mainJsText = $res->getBody()->getContents();
-                    $this->key = $this->getKey($mainJsText);
-                    if ($this->key == null) {
-                        throw new \Exception('Ключ Api не получен');
-                    }
-                    break;
-                } else throw new \Exception('Не найден главный js скрипт сайта. Возможно изменена структура');
-            }
-        }
+//        $tag = 'script';
+//        $matchGroup = $this->getTags($tag, $subject);
+        $this->key = "af0deccbgcgidddjgnvljitntccdduijhdinfgjgfjir";
+   //     foreach ($matchGroup as $item) {
+//            if (strpos($item, 'mstatic/build') !== false) {
+//                if (preg_match('~"([^"]*)"~u', $item, $m)) {
+//
+////                    $res = $this->client->request('GET', "https:" . $m[1], []);
+////                    $mainJsText = $res->getBody()->getContents();
+////                    $this->key = $this->getKey($mainJsText);
+//                    if ($this->key == null) {
+//                        throw new \Exception('Ключ Api не получен');
+//                    }
+//                    break;
+//                } else throw new \Exception('Не найден главный js скрипт сайта. Возможно изменена структура');
+//            }
+//        }
 
     }
 
@@ -186,29 +190,45 @@ class AvitoMobileParser
                     if( $item->type == "vip") continue;
                     try {
                         $uri = $item->value->uri_mweb;
-                        if ($this->exists($item) == false) {
+                        $tmp_obj = $this->exists($item);
+                        if (!$tmp_obj) {
                             $req = $this->client->request('GET', $this->BaseUrl . $uri, []);
                             if ($req->getStatusCode() != 200) throw new \Exception('Неудачный запрос ' . $uri);
-                            $xml = $req->getBody()->getContents();
+                            $html = $req->getBody()->getContents();
+                            //dd($xml);
 
-                            $initial_data = $this->getInitialData($xml);
+                            $initial_data = $this->getInitialData($html);
                             $data = json_decode($initial_data);
                             if ($data == null) {
                                 throw new \Exception("Невалидный JSON на " . $uri);
                             }
-
+                            //dd($data);
                             $obj = $this->generateObject($data);
+                            if(!isset($obj->phone)) $obj->phone = "none";
                             $obj->city = $this->getCity($this->LocationId);
-                            $obj->geo = $item->value->coords->lat.", " . $item->value->coords->lat;
+                            if(isset($item->value->coords)) {
+                                $obj->geo = $item->value->coords->lat .", " . $item->value->coords->lng;
+                            } else {
+                                $obj->geo = "47.8745, 44.7697";
+                            }
                             $obj->area = $item->value->location ?? "";
                             $this->setAddress($obj);
                             dump($obj);
                             $this->a_obj->addObj($obj);
                             sleep($this->Delay);
+                        } else {
+                            $ao = $this->newFromStd($tmp_obj);
+                            if(isset($item->value->coords)) {
+                                $ao->geo = $item->value->coords->lat . ", " . $item->value->coords->lng;
+                            } else {
+                                $ao->geo = "47.8745, 44.7697";
+                            }
+                            $ao->update();
                         }
                         $parsedCount++;
                     } catch (\Exception $e) {
                         dump($item);
+                        dump($parsedCount);
                         throw new \Exception("При парсинге объекта " . $uri . ". В строке " . $e->getLine() . " возникла ошибка:  " . $e->getMessage());
                     };
                 }
@@ -220,9 +240,25 @@ class AvitoMobileParser
         echo($count . ' ' . $parsedCount);
     }
 
+    public function newFromStd($std)
+    {
+        $instance = new \App\Aobject();
+
+        foreach ( (array) $std as $attribute => $value) {
+            $instance->{$attribute} = $value;
+        }
+
+        return $instance;
+    }
+
     private function exists($item)
     {
-        return $this->a_obj->getOne($item->value->id);
+        $results = DB::select('select * from aobjects where id = :id', ['id' => $item->value->id]);
+        if($results) {
+            return $results[0];
+        } else {
+            return false;
+        }
 
     }
 
@@ -570,7 +606,7 @@ class AvitoMobileParser
 
     private function getInitialData($xml)
     {
-        $re = '/__initialData__ = (.*?) \|\| \{\}<\/script>/m';
+        $re = '/__initialData__ = (.+?) \|\| \{\}/m';
         preg_match_all($re, $xml, $matches, PREG_SET_ORDER, 0);
         foreach ($matches as $match) {
             if (strlen($match[1]) > 11)

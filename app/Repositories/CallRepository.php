@@ -19,7 +19,7 @@ class CallRepository extends Repository {
 
     public function Add($call) {
 
-        $this->model->create([
+        $this->model->updateOrCreate([
             'number' => $call['number'],
             'url' => $call['url'],
             'status' => $call['status'],

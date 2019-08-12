@@ -6,6 +6,18 @@
  */
 
 require('./bootstrap');
+import {Swappable, Plugins} from '@shopify/draggable';
+
+const containers = document.querySelectorAll('#Flexbox .BlockLayout');
+
+
+const swappable = new Swappable(containers, {
+    draggable: '.Block--isDraggable',
+    mirror: {
+        constrainDimensions: true,
+    },
+    plugins: [Plugins.ResizeMirror],
+});
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

@@ -361,14 +361,29 @@
                     </div>
                     <div class="col-md-12 no-padding">
                         <div class="col-md-6">
-                            <div class="form-group">
+                            <div id="phones" class="form-group">
                                 <label for="client_phone" class="form-label semibold">Телефон</label>
                                 <div class="input-group">
                                     <div class="input-group-addon">
                                         <span>+7</span>
                                     </div>
                                     {!! Form::text('client_phone', isset($object->client->phone)? $object->client->phone : old("client_phone"), ["id" => "client_phone" ,"class" => "form-control phone-mask-input",  "required" => ""]) !!}
+
+                                    <span class="input-group-btn">
+                                        <button id="phone-add" class="btn btn-secondary" type="button">Добавить</button>
+                                    </span>
                                 </div>
+                                 @if(isset($object->phones))
+                                    @foreach($object->phones as $phone)
+                                         <label for="client_phone" class="form-label semibold">Телефон</label>
+                                            <div class="input-group">
+                                            <div class="input-group-addon">
+                                            <span>+7</span>
+                                            </div>
+                                            <input value="{{$phone}}" id="client_phone" class="form-control phone-mask-input" required="" name="client_phone2[]" type="text" placeholder="(___) ___-____" aria-required="true">
+                                            </div>
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
                     </div>

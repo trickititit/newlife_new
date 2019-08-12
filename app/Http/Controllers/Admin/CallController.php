@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Call;
 use App\Object;
 use App\Repositories\CallRepository;
 use App\Repositories\ObjectsRepository;
@@ -9,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Components\FtpMegafon;
+use Illuminate\Support\Facades\DB;
 
 class CallController extends AdminController
 {
@@ -26,6 +28,18 @@ class CallController extends AdminController
      *
      * @return \Illuminate\Http\Response
      */
+
+    private function exists($url)
+    {
+        $results = DB::select('select * from calls where url = :url', ['url' => $url]);
+        if($results) {
+            return $results[0];
+        } else {
+            return false;
+        }
+
+    }
+
     public function index()
     {
         $ftp = new FtpMegafon("records.megapbx.ru", "direktor@ip-plehanov.megapbx.ru", "Gkt[fyjd_2019");
@@ -63,15 +77,29 @@ class CallController extends AdminController
                     if ($contents_) {
                         $calls = $this->parseCalls($contents_);
                         foreach ($calls as &$call) {
-                            if (\App\Call::where("url", $call["url"])->exists()) {
+                            $ex_call = $this->exists($call["url"]);
+                            if ($ex_call) {
+                                $ex_call = Call::find($ex_call->id);
+                                foreach ($objects as $object) {
+                                    if ($object->client->phone == $ex_call->number) {
+                                        $ex_call->object_id = $object->id;
+                                        if ($ex_call->update()) {
+                                            break;
+                                        }
+                                    }
+                                }
+                                continue;
+                            } else {
+                                foreach ($objects as $object) {
+                                    if ($object->client->phone == $call["number"]) {
+                                        $call["object_id"] = $object->id;
+                                        break;
+                                    }
+                                }
+                                dump($call);
+                                $this->call_rep->Add($call);
                                 continue;
                             }
-                            foreach ($objects as $object) {
-                                if ($object->client->phone == $call["number"]) {
-                                    $call["object_id"] = $object->id;
-                                }
-                            }
-                            $this->call_rep->Add($call);
                         }
                     }
                 }
@@ -114,7 +142,7 @@ class CallController extends AdminController
             'Content-Length' => $size,
             'Content-Type' => "audio/mpeg",
             'Connection' => "Keep-Alive",
-            'Content-Range' => 'bytes 0-'.$end .'/'.$size,
+            'Content-Range' => 'bytes 0-' . $end . '/' . $size,
             'X-Pad' => 'avoid browser bug',
             'Etag' => 'mp3',
         ];

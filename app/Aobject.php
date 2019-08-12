@@ -3,10 +3,13 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Aobject extends Model
 {
-    protected $dates = ["created_at", "updated_at", "date"];
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at', "created_at", "updated_at", "date"];
 
     public function scopeToday($query) {
         return $query->whereDate('created_at', date('Y-m-d'));

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Requests\ObjectRequest;
 use App\Object;
 use App\Aobject;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ class AobjectController extends AdminController
         $this->inc_css_lib = array_add($this->inc_css_lib,'jq-steps', array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/separate/vendor/jquery-steps.min.css">'));
         $this->inc_css_lib = array_add($this->inc_css_lib,'multi-org', array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/lib/multipicker/multipicker.min.css">'));
         $this->inc_css_lib = array_add($this->inc_css_lib,'multi-custom', array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/separate/vendor/multipicker.min.css">'));
+        $this->inc_css_lib = array_add($this->inc_css_lib,'chosen', array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/chosen.min.css">'));
         $this->inc_js_lib = array_add($this->inc_js_lib,'dropzone',array('url' => '<script src="'.$this->pub_path.'/js/dropzone.js"></script>'));
         $this->inc_js_lib = array_add($this->inc_js_lib,'jq-validate', array('url' => '<script src="'.$this->pub_path.'/js/lib/jquery-validation/jquery.validate.min.js"></script>'));
         $this->inc_js_lib = array_add($this->inc_js_lib,'jq-steps', array('url' => '<script src="'.$this->pub_path.'/js/lib/jquery-steps/jquery.steps.min.js"></script>'));
@@ -45,8 +47,10 @@ class AobjectController extends AdminController
         $this->inc_js_lib = array_add($this->inc_js_lib, 'multipicker', array('url' => '<script src="'.$this->pub_path.'/js/lib/multipicker/multipicker.min.js"></script>'));
         $this->inc_js_lib = array_add($this->inc_js_lib, 'jq-input-mask', array('url' => '<script src="'.$this->pub_path.'/js/lib/input-mask/jquery.mask.min.js"></script>'));
         $this->inc_js_lib = array_add($this->inc_js_lib, 'init-input-mask', array('url' => '<script src="'.$this->pub_path.'/js/lib/input-mask/input-mask-init.js"></script>'));
+        $this->inc_js_lib = array_add($this->inc_js_lib, 'chosen', array('url' => '<script src="'.$this->pub_path.'/js/chosen.jquery.min.js"></script>'));
         // INIT INPUTS
         $this->inputs = array_add($this->inputs, "obj_type", array("1" => "Квартира", "2" => "Дом, Дача, Таунхаус", "3" => "Комната"));
+        $this->inputs = array_add($this->inputs, "client_need", array("1" => "1-к квартира","1x2" => "Две 1-к квартиры", "2" => "2-к квартира", "2x2" => "Две 2-к квартиры", "3" => "3-к квартира", "4-к квартира" => "4-к квартира", "Комната" => "Комната", "Дом" => "Дом", "Дача" => "Дача", "Коттедж" => "Коттедж", "Таунхаус" => "Таунхаус"));
         $this->inputs = array_add($this->inputs, "obj_deal", array("Продажа" => "Продажа", "Обмен" => "Обмен"));
         $this->inputs = array_add($this->inputs, "obj_form_1", array("Вторичка" => "Вторичка", "Новостройка" => "Новостройка"));
         $this->inputs = array_add($this->inputs, "obj_form_2", array("Дом" => "Дом", "Дача" => "Дача", "Коттедж" => "Коттедж", "Таунхаус" => "Таунхаус"));
@@ -91,7 +95,7 @@ class AobjectController extends AdminController
         return $this->renderOutput();
     }
 
-    public function store(Request $request)
+    public function store(ObjectRequest $request)
     {
         $this->checkUser();
         $request->obj_city = $this->getCityid($request->obj_city); 
@@ -101,7 +105,8 @@ class AobjectController extends AdminController
         if(is_array($result) && !empty($result['error'])) {
             return back()->with($result);
         }
-
+        $obj = Aobject::find($request->obj_id);
+        $obj->delete();
         return redirect('/admin')->with($result);
     }
 

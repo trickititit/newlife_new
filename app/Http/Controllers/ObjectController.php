@@ -49,6 +49,35 @@ class ObjectController extends SiteController
         return $this->renderOutput();
     }
 
+    public function dragIndex(JavaScriptMaker $jsmaker, Object $object) {
+//        $this->inc_js .= "
+//        <script>
+//
+//        const swappable = new Draggable.Swappable(document.querySelectorAll('#Flexbox .BlockLayout'), {
+//          draggable: '.Block--isDraggable',
+//            mirror: {
+//              constrainDimensions: true,
+//            },
+//            plugins: [ResizeMirror.ResizeMirror],
+//        });
+//
+//        swappable.on('swappable:start', () => console.log('swappable:start'));
+//        swappable.on('swappable:swapped', () => console.log('swappable:swapped'));
+//        swappable.on('swappable:stop', () => console.log('swappable:stop'));
+//        </script>
+//        ";
+        $this->inc_js_lib = array_add($this->inc_js_lib,    'drag', array('url' => '<script src="/js/app.js"></script>'));
+//        $this->inc_js_lib = array_add($this->inc_js_lib,    'drag-swap', array('url' => '<script src="'.$this->pub_path.'/js/swappable.js"></script>'));
+//        $this->inc_js_lib = array_add($this->inc_js_lib,    'drag-resize', array('url' => '<script src="'.$this->pub_path.'/js/plugins/resize-mirror.js"></script>'));
+        $other = $this->getOther($object);
+        $this->title = $this->o_rep->getTitle($object);
+        $obj_image= $this->o_rep->getObjImage($object);
+        $gallery = view(config('settings.theme').'.gallery')->with(array("images" => $object->images));
+        $this->content = view(config('settings.theme').'.object')->with(array("title" => $this->title, "object" => $object, "gallery" => $gallery, "obj_image" => $obj_image, "other" => $other));
+        $jsmaker->setJs("obj-view", $object, ($this->spec_offer_count > 5)? false : true, "", $this->randStr);
+        return $this->renderOutput();
+    }
+
     public function getOther($object) {
         switch ($object->category) {
             case "1":

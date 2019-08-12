@@ -15,7 +15,6 @@ class Storage extends Controller
 
     public function objUploadImage(Request $request, ObjectsRepository $o_rep)
     {
-
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             if ($image->isValid()) {
@@ -33,7 +32,10 @@ class Storage extends Controller
                 if (!file_exists($uploadDir)) {
                     mkdir($uploadDir, 0777);
                 }
-                $img = Photo::make($image);
+                $img = Photo::make($image)->orientate();
+                $img->brightness(15);
+                $img->contrast(15);
+                $img->gamma(1.3);
                 $img_type = $this->getTypeImg($img->mime());
                 if($img_type == ".err") {
                     return false;

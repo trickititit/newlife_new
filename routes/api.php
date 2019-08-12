@@ -14,3 +14,5 @@ use Illuminate\Http\Request;
 */
 
 
+Route::get('/reconstruct', ['uses' => 'IndexController@reconstruction', 'as' => 'site.recon']);
+

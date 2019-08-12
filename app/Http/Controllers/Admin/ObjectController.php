@@ -56,7 +56,7 @@ class ObjectController extends AdminController
         $this->inputs = array_add($this->inputs, "obj_deal", array("Продажа" => "Продажа", "Обмен" => "Обмен"));
         $this->inputs = array_add($this->inputs, "obj_form_1", array("Вторичка" => "Вторичка", "Новостройка" => "Новостройка"));
         $this->inputs = array_add($this->inputs, "obj_form_2", array("Дом" => "Дом", "Дача" => "Дача", "Коттедж" => "Коттедж", "Таунхаус" => "Таунхаус"));
-        $this->inputs = array_add($this->inputs, "client_need", array("1-к квартира" => "1-к квартира", "2-к квартира" => "2-к квартира", "3-к квартира" => "3-к квартира", "4-к квартира" => "4-к квартира", "Комната" => "Комната", "Дом" => "Дом", "Дача" => "Дача", "Коттедж" => "Коттедж", "Таунхаус" => "Таунхаус"));
+        $this->inputs = array_add($this->inputs, "client_need", array("1" => "1-к квартира","1x2" => "Две 1-к квартиры", "2" => "2-к квартира", "2x2" => "Две 2-к квартиры", "3" => "3-к квартира", "4-к квартира" => "4-к квартира", "Комната" => "Комната", "Дом" => "Дом", "Дача" => "Дача", "Коттедж" => "Коттедж", "Таунхаус" => "Таунхаус"));
         $this->inputs = array_add($this->inputs, "obj_form_3", array("Гостиничного" => "Гостиничного", "Коридорного" => "Коридорного", "Секционного" => "Секционного", "Коммунальная" => "Коммунальная"));
         $this->inputs = array_add($this->inputs, "obj_room", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5", "6" => "6", "7" => "7", "8" => "8", "9" => "9", "10" => "9+"));
         $this->inputs = array_add($this->inputs, "obj_home_floors_2", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5+"));
@@ -77,6 +77,12 @@ class ObjectController extends AdminController
 //            dump($obj);
             $this->o_rep->addObject($obj);
         } 
+    }
+
+
+    public function getJSON() {
+        $objects = $this->o_rep->get("*");
+        return response()->json($objects->toArray());
     }
 
     /**
@@ -165,7 +171,8 @@ class ObjectController extends AdminController
         if ($object->client->phone[0] == "8") {
             $object->client->phone = substr( $object->client->phone, 1);
         }
-        $this->content = view(config('settings.theme').'.admin.objectCreate')->with(array("object" => $object,'cities' => $cities, "obj_id" => $object->id, "comforts" => $comforts, "inputs" => $this->inputs, 'obj_param' => $obj_param, 'category' => '', 'deal' => '', 'type' => ''))->render();
+        if(isset($object->phones)) $object->phones = explode(";", $object->phones);
+        $this->content = view(config('settings.theme').'.admin.objectCreate')->with(array("object" => $object,'cities' => $cities, "obj_id" => $object->id, "comforts" => $comforts, "inputs" => $this->inputs, 'obj_param' => $obj_param, 'category' => '', 'deal' => $object->deal, 'type' => ''))->render();
         $this->title = 'Редактирование объекта';
         return $this->renderOutput();
     }
@@ -189,8 +196,7 @@ class ObjectController extends AdminController
             return back()->with($result);
         }
         if($object->out) {
-            $objects = Object::Outed()->get();
-            $this->ObjectsToXml($objects);
+            $this->ObjectsToXml();
         }
         return redirect('/admin')->with($result);
     }
@@ -233,14 +239,89 @@ class ObjectController extends AdminController
     public function Out(Object $object, Request $request)
     {
         $this->checkUser();
-        $object->outed_at = Carbon::now();
-        $object->out = 1;
-        if ($object->update()) {
-            $objects = Object::Outed()->get();
-            $this->ObjectsToXml($objects);
-            return back()->with(['status' => 'Объект добавлен на выгрузку', 'offset' => $request->offset]);
-        } else {
-            return back()->with(['error' => 'Ошибка добавления на выгрузку', 'offset' => $request->offset]);
+        switch ($request->target) {
+            case "avito":
+                $object->outed_at = Carbon::now();
+                $object->out = 1;
+                $object->out_avito = 1;
+                if ($object->update()) {
+                    $objects = Object::OutedAvito()->get();
+                    $objects_all = Object::OutedAll()->get();
+
+                    $objects_avito = array();
+                    foreach($objects as $object) {
+                        $objects_avito[] = $this->ObjectToArrayAvito($object);
+                    }
+                    foreach($objects_all as $object) {
+                        $objects_avito[] = $this->ObjectToArrayAvito($object);
+                    }
+                    $this->putXml($objects_avito, "avito");
+
+                    //@TODO: ДОДЕЛАТЬ ОФФСЕТ
+                    return back()->with(['status' => 'Объект добавлен на выгрузку', 'offset' => $request->offset]);
+                } else {
+                    return back()->with(['error' => 'Ошибка добавления на выгрузку', 'offset' => $request->offset]);
+                }
+                break;
+            case "click":
+                $object->outed_at = Carbon::now();
+                $object->out = 1;
+                $object->out_click = 1;
+                if ($object->update()) {
+                    $objects = Object::OutedClick()->get();
+                    $objects_all = Object::OutedAll()->get();
+
+                    $objects_click = array();
+                    foreach($objects as $object) {
+                        $objects_click[] = $this->ObjectToArrayClick($object);
+                    }
+                    foreach($objects_all as $object) {
+                        $objects_click[] = $this->ObjectToArrayClick($object);
+                    }
+                    $this->putXml($objects_click, "click");
+
+                    //@TODO: ДОДЕЛАТЬ ОФФСЕТ
+                    return back()->with(['status' => 'Объект добавлен на выгрузку', 'offset' => $request->offset]);
+                } else {
+                    return back()->with(['error' => 'Ошибка добавления на выгрузку', 'offset' => $request->offset]);
+                }
+                break;
+            case "yandex":
+                $object->outed_at = Carbon::now();
+                $object->out = 1;
+                $object->out_yandex = 1;
+                if ($object->update()) {
+                    $objects = Object::OutedYandex()->get();
+                    $objects_all = Object::OutedAll()->get();
+                    $objects_yandex = array();
+                    foreach($objects as $object) {
+                        $objects_yandex[] = $this->ObjectToArrayYandex($object);
+                    }
+                    foreach($objects_all as $object) {
+                        $objects_yandex[] = $this->ObjectToArrayYandex($object);
+                    }
+                    $this->putXml($objects_yandex, "yandex");
+                    //@TODO: ДОДЕЛАТЬ ОФФСЕТ
+                    return back()->with(['status' => 'Объект добавлен на выгрузку', 'offset' => $request->offset]);
+                } else {
+                    return back()->with(['error' => 'Ошибка добавления на выгрузку', 'offset' => $request->offset]);
+                }
+                break;
+            default:
+                $object->outed_at = Carbon::now();
+                $object->out = 1;
+                $object->out_yandex = 0;
+                $object->out_avito = 0;
+                $object->out_click = 0;
+                $object->out_all = 1;
+                if ($object->update()) {
+                    $this->ObjectsToXml();
+                    //@TODO: ДОДЕЛАТЬ ОФФСЕТ
+                    return back()->with(['status' => 'Объект добавлен на выгрузку', 'offset' => $request->offset]);
+                } else {
+                    return back()->with(['error' => 'Ошибка добавления на выгрузку', 'offset' => $request->offset]);
+                }
+                break;
         }
     }
 
@@ -249,10 +330,13 @@ class ObjectController extends AdminController
         $this->checkUser();
         $object->outed_at = null;
         $object->out = 0;
+        $object->out_avito = 0;
+        $object->out_yandex = 0;
+        $object->out_click = 0;
+        $object->out_all = 0;
         if ($object->update()) {
-            $objects = Object::Outed()->get();
-            $this->ObjectsToXml($objects);
-            return back()->with(['status' => 'Объект удален из выгрузку', 'offset' => $request->offset]);
+            $this->ObjectsToXml();
+            return back()->with(['status' => 'Объект удален из выгрузки', 'offset' => $request->offset]);
         } else {
             return back()->with(['error' => 'Ошибка удаления из выгрузки', 'offset' => $request->offset]);
         }
@@ -404,7 +488,7 @@ class ObjectController extends AdminController
         if ($phone[0] == 8 || $phone[0] == 7) {
             $phone = substr( $phone, 1);
         }
-        $phone = "+7" . $phone;
+        $phone = "8" . $phone;
         return response()->json([
             'id'   => $object->id,
             'name' => $name,
@@ -492,11 +576,14 @@ class ObjectController extends AdminController
                     if($object->workingUser->id == $this->user->id || $this->user->role->name == "admin") {
                         $object->outed_at = Carbon::now();
                         $object->out = 1;
+                        $object->out_yandex = 0;
+                        $object->out_avito = 0;
+                        $object->out_click = 0;
+                        $object->out_all = 1;
                         $object->update();
                     }
                 }
-                $objects_ = Object::Outed()->get();
-                $this->ObjectsToXml($objects_);
+                $this->ObjectsToXml();
                 return back()->with(['status' => 'Объекты добавлены на выгрузку']);
                 break;
             case "unwork":
@@ -513,6 +600,10 @@ class ObjectController extends AdminController
                     if($this->user->role->name == "admin") {
                         $object->outed_at = null;
                         $object->out = 0;
+                        $object->out_avito = 0;
+                        $object->out_yandex = 0;
+                        $object->out_click = 0;
+                        $object->out_all = 0;
                         $object->update();
                     }
                 }
@@ -570,15 +661,33 @@ class ObjectController extends AdminController
        }
     }
 
-    public function ObjectsToXml($objects) {
+    public function ObjectsToXml() {
         $objects_avito = array();
         $objects_yandex = array();
         $objects_click = array();
-        foreach($objects as $object) {
+        $objects_to_avito = Object::OutedAvito()->get();
+        $objects_to_yandex = Object::OutedYandex()->get();
+        $objects_to_click = Object::OutedClick()->get();
+        $objects_to_all = Object::OutedAll()->get();
+
+        foreach($objects_to_avito as $object) {
+            $objects_avito[] = $this->ObjectToArrayAvito($object);
+        }
+
+        foreach($objects_to_yandex as $object) {
+            $objects_yandex[] = $this->ObjectToArrayYandex($object);
+        }
+
+        foreach($objects_to_click as $object) {
+            $objects_click[] = $this->ObjectToArrayClick($object);
+        }
+
+        foreach($objects_to_all as $object) {
             $objects_avito[] = $this->ObjectToArrayAvito($object);
             $objects_yandex[] = $this->ObjectToArrayYandex($object);
             $objects_click[] = $this->ObjectToArrayClick($object);
         }
+
         $this->putXml($objects_avito, "avito");
         $this->putXml($objects_yandex, "yandex");
         $this->putXml($objects_click, "click");
@@ -612,13 +721,13 @@ class ObjectController extends AdminController
         switch ($object->category) {
             case "1":
                 $obj["Id"] = md5($object->id);
-                $obj{"Category"} = "Квартиры";
-                $obj{"OperationType"} = "Продам";
+                $obj["Category"] = "Квартиры";
+                $obj["OperationType"] = "Продам";
                 //поменять
                 $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
                 $obj["Description"] = $object->desc;
                 $obj["AdStatus"] = "Free";
-                $obj["EMail"] = $object->createdUser->email;
+                $obj["EMail"] = $object->createdUser->email ?? "rieltor2009@ya.ru";
                 $obj["CompanyName"] = $companyName;
                 if($object->working_id) {
                     $obj["ManagerName"] = $object->workingUser->name;
@@ -654,13 +763,13 @@ class ObjectController extends AdminController
                 break;
             case "2":
                 $obj["Id"] = md5($object->id);
-                $obj{"Category"} = "Дома, дачи, коттеджи";
-                $obj{"OperationType"} = "Продам";
+                $obj["Category"] = "Дома, дачи, коттеджи";
+                $obj["OperationType"] = "Продам";
                 //поменять
                 $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
                 $obj["Description"] = $object->desc;
                 $obj["AdStatus"] = "Free";
-                $obj["EMail"] = $object->createdUser->email;
+                $obj["EMail"] = $object->createdUser->email ?? "rieltor2009@ya.ru";
                 $obj["CompanyName"] = $companyName;
                 if($object->working_id) {
                     $obj["ManagerName"] = $object->workingUser->name;
@@ -695,13 +804,13 @@ class ObjectController extends AdminController
                 break;
             case "3":
                 $obj["Id"] = md5($object->id);
-                $obj{"Category"} = "Комнаты";
-                $obj{"OperationType"} = "Продам";
+                $obj["Category"] = "Комнаты";
+                $obj["OperationType"] = "Продам";
                 //поменять
                 $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
                 $obj["Description"] = $object->desc;
                 $obj["AdStatus"] = "Free";
-                $obj["EMail"] = $object->createdUser->email;
+                $obj["EMail"] = $object->createdUser->email ?? "rieltor2009@ya.ru";
                 $obj["CompanyName"] = $companyName;
                 if($object->working_id) {
                     $obj["ManagerName"] = $object->workingUser->name;
@@ -747,9 +856,9 @@ class ObjectController extends AdminController
         switch ($object->category) {
             case "1":
                 $obj["@attributes"] = array("internal-id" => md5($object->id));
-                $obj{"category"} = "квартира";
-                $obj{"type"} = "продажа";
-                $obj{"property-type"} = "жилая";
+                $obj["category"] = "квартира";
+                $obj["type"] = "продажа";
+                $obj["property-type"] = "жилая";
                 $obj["cadastral-number"] = $object->cadastral;
                 $obj["creation-date"] = $object->created_at->toIso8601String();
                 $obj["last-update-date"] = $object->updated_at->toIso8601String();
@@ -793,9 +902,9 @@ class ObjectController extends AdminController
                 break;
             case "2":
                 $obj["@attributes"] = array("internal-id" => md5($object->id));
-                $obj{"category"} = strtolower($object->type);
-                $obj{"type"} = "продажа";
-                $obj{"property-type"} = "жилая";
+                $obj["category"] = strtolower($object->type);
+                $obj["type"] = "продажа";
+                $obj["property-type"] = "жилая";
                 $obj["cadastral-number"] = $object->cadastral;
                 $obj["creation-date"] = $object->created_at->toIso8601String();
                 $obj["last-update-date"] = $object->updated_at->toIso8601String();
@@ -836,9 +945,9 @@ class ObjectController extends AdminController
                 break;
             case "3":
                 $obj["@attributes"] = array("internal-id" => md5($object->id));
-                $obj{"category"} = "комната";
-                $obj{"type"} = "продажа";
-                $obj{"property-type"} = "жилая";
+                $obj["category"] = "комната";
+                $obj["type"] = "продажа";
+                $obj["property-type"] = "жилая";
                 $obj["cadastral-number"] = $object->cadastral;
                 $obj["creation-date"] = $object->created_at->toIso8601String();
                 $obj["last-update-date"] = $object->updated_at->toIso8601String();
@@ -895,8 +1004,8 @@ class ObjectController extends AdminController
         switch ($object->category) {
             case "1":
                 $obj["Id"] = md5($object->id);
-                $obj{"Category"} = "Квартиры";
-                $obj{"OperationType"} = "Продам";
+                $obj["Category"] = "Квартиры";
+                $obj["OperationType"] = "Продам";
                 //поменять
                 $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
                 $obj["Description"] = $object->desc;
@@ -937,8 +1046,8 @@ class ObjectController extends AdminController
                 break;
             case "2":
                 $obj["Id"] = md5($object->id);
-                $obj{"Category"} = "Дома, дачи, коттеджи";
-                $obj{"OperationType"} = "Продам";
+                $obj["Category"] = "Дома, дачи, коттеджи";
+                $obj["OperationType"] = "Продам";
                 //поменять
                 $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
                 $obj["Description"] = $object->desc;
@@ -978,8 +1087,8 @@ class ObjectController extends AdminController
                 break;
             case "3":
                 $obj["Id"] = md5($object->id);
-                $obj{"Category"} = "Комнаты";
-                $obj{"OperationType"} = "Продам";
+                $obj["Category"] = "Комнаты";
+                $obj["OperationType"] = "Продам";
                 //поменять
                 $obj["DateBegin"] = $object->outed_at->format('Y-m-d');
                 $obj["Description"] = $object->desc;

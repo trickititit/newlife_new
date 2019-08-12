@@ -52,11 +52,11 @@ class IndexController extends AdminController {
         $this->inputs = array_add($this->inputs, "obj_floor", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5", "6" => "6", "7" => "7", "8" => "8", "9" => "9", "10" => "10", "11" => "11", "12" => "12", "13" => "13", "14" => "14", "15" => "15", "16" => "16", "17" => "17", "18" => "18", "19" => "19", "20" => "20"));
         $this->inputs = array_add($this->inputs, "obj_distance", array("0" => "В черте города", "10" => "10 км", "20" => "20 км", "30" => "30 км", "50" => "50 км", "70" => "70+ км"));
         $this->inputs = array_add($this->inputs, "obj_home_floors_1", array("1" => "1", "2" => "2", "3" => "3", "4" => "4", "5" => "5", "6" => "6", "7" => "7", "8" => "8", "9" => "9", "10" => "10", "11" => "11", "12" => "12", "13" => "13", "14" => "14", "15" => "15", "16" => "16", "17" => "17", "18" => "18", "19" => "19", "20" => "20"));
+        $this->inputs = array_add($this->inputs, "out", array("avito" => "Avito", "yandex" => "Yandex", "click" => "Click", "all" => "Во все системы"));
     }
 
     public function index(JavaScriptMaker $jsmaker, Request $request, $type = 'default', $order = ["created_at", "desc"]) {
         $this->checkUser();
-
 //        if (Gate::check('isAdmin', $this->user)) {
 //            abort(403);
 //        }
@@ -101,12 +101,17 @@ class IndexController extends AdminController {
             $filter_data = $request->except("search");
         }
         $filter = view(config('settings.theme').'.admin.filter')->with(array("inputs" => $this->inputs, "cities" => $cities, "data" => $filter_data));
-        $this->content = view(config('settings.theme').'.admin.objects')->with(array("objects" => $objects, "menus" => $menus, "actions" => $actions, "mass_actions" => $mass_actions,"order_select" => $order_select, "type" => $type, "filter" => $filter, "selected" => $selected, "user" => $this->user))->render();
+        $this->content = view(config('settings.theme').'.admin.objects')->with(array("objects" => $objects, "menus" => $menus, "actions" => $actions, "mass_actions" => $mass_actions,"order_select" => $order_select, "type" => $type, "filter" => $filter, "selected" => $selected, "user" => $this->user, "inputs" => $this->inputs))->render();
         $this->title = 'Личный кабинет';
         return $this->renderOutput();
     }
 
     public function avito(JavaScriptMaker $jsmaker, Request $request, $order = ["date", "desc"]) {
+//        $objects = $this->aobj_rep->get("*");
+//        foreach ($objects as $object) {
+//            $y = (int) $object->created_at->format("Y");
+//            if($y == 2017 ) $object->delete();
+//        }
         $this->checkUser();
         if($this->user->cant('viewAvito', $this->user)) {
             return back()->with(array('error' => 'Доступ запрещен'));
@@ -161,6 +166,14 @@ class IndexController extends AdminController {
         }
         $actions = array();
         foreach ($objects as $object) {
+            //сделать проверочки
+            if (isset($object->client_contacts) && strlen($object->client_contacts) > 1 && $object->client_contacts != "none") {
+                $phone = preg_replace("/[^,.0-9]/", '', $object->client_contacts);
+                if ($phone[0] == 8 || $phone[0] == 7) {
+                    $phone = substr( $phone, 1);
+                }
+                $object->client_contacts = "8" . $phone;
+            }
             $actions = array_add($actions,"object".$object->id, $this->getAobjActions($object));
         }
         $filter = view(config('settings.theme').'.admin.filterA')->with(array("inputs" => $this->inputs, "cities" => $cities, "data" => $data));
@@ -267,7 +280,10 @@ class IndexController extends AdminController {
                 $deletelink = route('object.softDelete',['object'=>$object->alias]);
                 $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                 $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
-                $out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
+               // $out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
+                $out = "<button class='btn btn-secondary btn-sm out-modal' data-base-url=\"" . route('object.out' , ['object'=>'']) . "\" data-alias=\"$object->alias\" data-toggle=\"modal\" data-target=\".modal-out\" data-placement=\"bottom\" title='Выгрузить'>
+                        <i class=\"fa fa-retweet fa-lg\"></i></button>";
+
                 return $edit.$uninwork.$out.$delete;
             case "prework":
                 $editlink = route('object.edit',['object'=>$object->alias]);
@@ -277,7 +293,9 @@ class IndexController extends AdminController {
                 $deletelink = route('object.softDelete',['object'=>$object->alias]);
                 $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                 $edit = "<a class='btn btn-secondary btn-sm' href='$editlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Редактировать'><i class=\"fa fa-edit fa-lg\"></i></a>";
-                $out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
+                //$out = "<form action='$outlink' method='post'><input type=\"hidden\" name=\"_method\" value=\"PUT\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Выгрузить'><i class=\"fa fa-retweet fa-lg\"></i></button></form>";
+                $out = "<button class='btn btn-secondary btn-sm out-modal' data-base-url=\"" . route('object.out' , ['object'=>'']) . "\" data-alias=\"$object->alias\" data-toggle=\"modal\" data-target=\".modal-out\" data-placement=\"bottom\" title='Выгрузить'>
+                        <i class=\"fa fa-retweet fa-lg\"></i></button>";
                 return $edit.$uninwork.$out.$delete;
 //                $who = $object->preworkingUser->name;
 //                $acceptlink = route('object.accessPreWork',['object'=>$object->alias]);
@@ -295,7 +313,7 @@ class IndexController extends AdminController {
                 $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
                 return $edit.$accept.$delete;
             case "deleted":
-                $who = $object->deletedUser->name;
+                $who = $object->deletedUser->name ?? "";
                 $acceptlink = route('object.destroy',['object'=>$object->alias]);
                 $restorelink = route('object.restore',['object'=>$object->alias]);
                 $who_delete = "<p style='color: #BABABA; margin:0 !important;'>От ".$who."</p>";
@@ -394,7 +412,7 @@ class IndexController extends AdminController {
     public function getAobjActions($aobject) {
         $deletelink = route('aobject.delete',['aobject'=>$aobject->id]);
         $transferlink = route('aobject.transfer',['aobject'=>$aobject->id]);
-        $transfer = "<a class='btn btn-secondary btn-sm' href='$transferlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Перенести'><i class=\"fa fa-edit fa-lg\"></i></a>";
+        $transfer = "<a target='_blank' class='btn btn-secondary btn-sm' href='$transferlink' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Перенести'><i class=\"fa fa-edit fa-lg\"></i></a>";
         $delete = "<form action='$deletelink' method='post'><input type=\"hidden\" name=\"_method\" value=\"DELETE\"><input type=\"hidden\" name=\"_token\" value=\"".csrf_token()."\"><button class='btn btn-secondary btn-sm' type='submit' data-toggle=\"tooltip\" data-placement=\"bottom\" title='Удалить'><i class=\"fa fa-trash fa-lg\"></i></button></form>";
         $favor_ = $this->checkAFavorite($aobject);
         $favoriteslink = route('aobject.favorite',['aobject'=>$aobject->id]);

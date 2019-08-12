@@ -53,7 +53,7 @@
                     <button type="button" data-toggle="modal" data-target="#addObj" class="btn btn-nav btn-rounded btn-inline btn-success-outline" href="{{route("object.create", ['category' => '4', 'deal' => 'Продажа', 'type' => 'хз'])}}">
                         Добавить объект
                     </button>
-                    <a type="button" class="btn btn-nav btn-rounded btn-inline btn-warning-outline" href="{{route("admin.favorites")}}">
+                    <a class="btn btn-nav btn-rounded btn-inline btn-warning-outline" href="{{route("admin.favorites")}}">
                         Избранное
                         <span class="badge badge-warning margin-left fav-count">{{$user->favorites()->count() + $user->a_favorites()->count()}}</span>
                     </a>
@@ -169,9 +169,16 @@
         $.notify({
             icon: 'font-icon font-icon-check-circle',
             title: '<strong>Успешно</strong>',
+            @if (session('url'))
+                url: '{{session('url')}}',
+            @endif
             message: '{{ session('status') }}'
         }, {
-            type: 'success'
+            type: 'success',
+            @if(session('url'))
+                timer: 100000,
+                url_target: '_blank'
+            @endif
         });
     });
     </script>
@@ -193,7 +200,7 @@
     <script>
         $(document).ready(function() {
             $.notify({
-                icon: 'ffont-icon font-icon-warning',
+                icon: 'font-icon font-icon-warning',
                 title: '<strong>Ошибка</strong>',
                 url: '{{session('url')}}',
                 message: '{{session('error')}}'
@@ -397,21 +404,37 @@
             $('.action-checkbox:checkbox').prop('checked',c);
         });
 
+
+        $('#phone-add').click(function() {
+            $('#phones').append(
+            '<div class="form-group">\n' +
+                '                                <label for="client_phone" class="form-label semibold">Телефон</label>\n' +
+                '                                <div class="input-group">\n' +
+                '                                    <div class="input-group-addon">\n' +
+                '                                        <span>+7</span>\n' +
+                '                                    </div>\n' +
+                '                                    <input id="client_phone" class="form-control phone-mask-input" required="" name="client_phone2[]" type="text" placeholder="(___) ___-____" aria-required="true">\n' +
+                '                                    </div>'
+            );
+        });
+
         $('.js-show-phone').click(function (e) {
             var href = $(this).attr('href');
-            e.preventDefault();
-            $.ajax({
-                url: href,
-                success: function(data){
-                    var btn = $('.js-show-phone[data-id=' + data.id + ']');
-                    btn.attr('data-show', true);
-                    btn.attr('href', "tel:" + data.phone);
-                    btn.find('span.js-name').html(data.name);
-                    btn.find('span.js-father_name').html(data.father_name);
-                    btn.find('span.js-phone').html(data.phone);
-
-                }
-            });
+            if($(this).attr('data-show') == "false") {
+                e.preventDefault();
+                $.ajax({
+                    url: href,
+                    success: function(data){
+                        var btn = $('.js-show-phone[data-id=' + data.id + ']');
+                        btn.attr('data-show', true);
+                        btn.attr('href', "tel:" + data.phone);
+                        btn.find('span.js-name').html(data.name);
+                        btn.find('span.js-father_name').html(data.father_name);
+                        btn.find('span.js-phone').html(data.phone);
+                        btn.removeClass("js-show-phone");
+                    }
+                });
+            }
         });
 
         $('.table .table-desc').click(function () {
@@ -444,7 +467,71 @@
             }
         });
         initSlider("init");
+        $('.out-modal').click(function(){
+            var alias =  $(this).attr("data-alias");
+            var url = $(this).attr("data-base-url");
+            $('#out-form').attr("action", url + "/" + alias);
+        });
     });
+
+    var mymap = L.map('mapid').setView([48.7979,44.7462], 13);
+
+    L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+        attribution: '&copy; Volganet Map',
+        id: 'mapbox.streets'
+    }).addTo(mymap);
+
+    var cluster = L.markerClusterGroup();
+    var Icon = L.icon({
+        iconUrl: "{{asset("new_life/img")}}/map.png",
+        iconSize: [20, 20]
+    });
+    mymap.addLayer(cluster);
+    $.ajax({
+        url: "/admin/api/objects",
+    })
+    .done(function (data) {
+        data.forEach(function (elem) {
+            var geo = elem.geo.split(',');
+            // console.log(geo);
+            if( geo.length < 2) {
+                return;
+            }
+
+            switch (elem.category) {
+                case 1:
+                    var title = elem.rooms + "-к квартира " + elem.square + " м² " + elem.floor + "/" + elem.build_floors + "эт. ";
+                    break;
+                case 2:
+                    var title = elem.type + " " + elem.home_square + " м² на участке " + elem.earth_square;
+                    break;
+                case 3:
+                    var title = "Комната в " + elem.rooms+ "-к " + elem.square+ " м² " + elem.floor+ "/" + elem.build_floors +" эт.";
+                    break;
+                default:
+                    break;
+            }
+
+            let cam = L.marker([geo[0], geo[1]], { title: title, icon: Icon });
+            var pop = "<div class='card'><div class='card-block'><h3 class='card-header'>" + title +"</h3><h4 class='card-title'>" + elem.price  + " руб. </br> " + elem.address + "</h4><p class='card-text'>" + elem.desc  + "</p><p class='card-text'>" + elem.comment  + "</p><a href='/object/" + elem.alias + "' class='btn btn-primary'>Перейти</a></div></div>";
+            var customOptions =
+                {
+                    'minWidth': '440',
+                    'maxWidth': '500',
+                    'className' : 'custom'
+                };
+            cam.bindPopup(L.popup(customOptions).setContent(pop));
+            cam.addTo(cluster);
+            });
+
+    });
+
+    $('#collapseExample').on('shown.bs.collapse', function (e) {
+        mymap.invalidateSize(true);
+    })
+
+
+
 </script>
 </body>
 </html>

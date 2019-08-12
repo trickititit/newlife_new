@@ -39,7 +39,7 @@
                             <td class="table-address-a"><div class="tab_content">{{ $object->city }},<br>{{ $object->address }},<br>{{ $object->area }}</div></td>
                             <td><div class="tab_content">{{ number_format($object->price) }}</div></td>
                             <td class="table-desc" style="max-width: 100% !important;"><div class="tab_content">{{ $object->desc }}</div></td>
-                            <td class="table-contact-a"><div class="tab_content">{{$object->client_contacts}} - {{ $object->client_name }}</div></td>
+                            <td class="table-contact-a"><div class="tab_content"><a href="tel:{{$object->client_contacts}}" class="btn btn-success btn-phone col-md-12"><span class="button-text">{{$object->client_contacts}}</span><br><span class="button-text">{{ $object->client_name }}</span></a></div></td>
                             <td width="100"><div class="btn-actions centovka">
                             {!! $actions["object".$object->id] !!}
                          </div>

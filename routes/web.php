@@ -39,6 +39,8 @@ Route::get('/xml/{file}.xml', function($file = null)
 //admin
 Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
 //
+    Route::get('/api/objects', ['uses' => 'Admin\ObjectController@getJson', 'as' => 'api.object']);
+
     Route::get('/call/{data}/{url}', ['uses' => 'Admin\CallController@getCall', 'as' => 'call.get']);
     Route::get('/object/create/{category}/{deal}/{type}', ['uses' => 'Admin\ObjectController@create', 'as' => 'object.create']);
     Route::get('/avito/{order?}', ['uses' => 'Admin\IndexController@avito', 'as' => 'object.avito']);
@@ -82,6 +84,5 @@ Route::group(['prefix' => 'admin','middleware' => ['auth']],function() {
     Route::get('/{type?}/{order?}',['uses' => 'Admin\IndexController@index','as' => 'adminIndex']);
 });
 
-Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');

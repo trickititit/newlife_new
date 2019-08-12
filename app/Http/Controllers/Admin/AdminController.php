@@ -64,15 +64,20 @@ class AdminController extends Controller
             'main' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/main.css">'),
             'loader' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/loaders.css">'),
             'style' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/style.css">'),
-            'jquery.webui-popover.min' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/jquery.webui-popover.min.css">')
-            );
+            'jquery.webui-popover.min' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/jquery.webui-popover.min.css">'),
+            'leaflet' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/leaflet/leaflet.css">'),
+            'leaflet-cluster' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/MarkerCluster.css">'),
+            'leaflet-cluster2' => array('url' => '<link rel="stylesheet" href="'.$this->pub_path.'/css/MarkerCluster.Default.css">'),
+        );
         $this->inc_js_lib = array(
             'jq' => array('url' => '<script src="'.$this->pub_path.'/js/lib/jquery/jquery.min.js"></script>'),
             'tether' => array('url' => '<script src="'.$this->pub_path.'/js/lib/tether/tether.min.js"></script>'),
             'bootstrap' => array('url' => '<script src="'.$this->pub_path.'/js/lib/bootstrap/bootstrap.min.js"></script>'),
             'plugins' => array('url' => '<script src="'.$this->pub_path.'/js/plugins.js"></script>'),
             'notify' => array('url' => '<script src="'.$this->pub_path.'/js/lib/bootstrap-notify/bootstrap-notify.min.js"></script>'),
-            'jquery.webui-popover' => array('url' => '<script src="'.$this->pub_path.'/js/jquery.webui-popover.min.js"></script>')
+            'jquery.webui-popover' => array('url' => '<script src="'.$this->pub_path.'/js/jquery.webui-popover.min.js"></script>'),
+            'leaflet' => array('url' => '<script src="'.$this->pub_path.'/leaflet/leaflet.js"></script>'),
+            'leaflet-cluster' => array('url' => '<script src="'.$this->pub_path.'/leaflet/leaflet.markercluster-src.js"></script>'),
         );
         $this->m_rep = $m_rep;
         $this->rieltors = $user->Rieltors()->get();
